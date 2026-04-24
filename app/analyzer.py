@@ -1,7 +1,7 @@
 """Impact analyzer — calls the configured Databricks serving endpoint.
 
-Uses the OpenAI-compatible `/serving-endpoints` API so we can set
-`response_format={"type": "json_object"}` for reliable structured output.
+Uses the Databricks SDK's OpenAI-compatible client for reliable auth
+and connectivity inside Databricks Apps.
 """
 from __future__ import annotations
 
@@ -10,21 +10,31 @@ import logging
 import re
 from typing import Dict, List, Optional
 
-from databricks.sdk.core import Config
-from openai import OpenAI
-
-from app import config as cfg
-from app.resolver import ticker_details
+import config as cfg
 
 log = logging.getLogger(__name__)
 
 
-def _client() -> OpenAI:
-    c = Config()
-    hdr = c.authenticate()
-    auth = hdr.get("Authorization", "")
-    token = auth[7:] if auth.lower().startswith("bearer ") else ""
-    return OpenAI(api_key=token, base_url=f"{cfg.DATABRICKS_HOST}/serving-endpoints")
+def _client():
+    """Create an OpenAI-compatible client using the Databricks SDK."""
+    try:
+        from databricks.sdk import WorkspaceClient
+        w = WorkspaceClient()
+        return w.serving_endpoints.get_open_ai_client()
+    except Exception:
+        # Fallback to manual OpenAI client
+        from databricks.sdk.core import Config
+        from openai import OpenAI
+        c = Config()
+        hdr = c.authenticate()
+        auth = hdr.get("Authorization", "")
+        token = auth[7:] if auth.lower().startswith("bearer ") else ""
+        host = cfg.DATABRICKS_HOST
+        if not host.startswith("http"):
+            host = f"https://{host}"
+        base = f"{host}/serving-endpoints"
+        log.info("Fallback OpenAI client: base_url=%s", base)
+        return OpenAI(api_key=token, base_url=base)
 
 
 SYSTEM_PROMPT = """You are a sell-side equity analyst. Given one news story and a
@@ -55,10 +65,19 @@ def analyze(headline: str, body: str, tickers: List[str]) -> Dict[str, dict]:
     if not tickers:
         return {}
 
+    # Build ticker context — use direct SQL instead of resolver cache
+    from delta_store import query as dq
     ticker_lines = []
     for t in tickers:
-        d = ticker_details(t) or {}
-        ticker_lines.append(f"- {t}: {d.get('company_name', '')} ({d.get('sector', '')})")
+        try:
+            rows = dq(f"SELECT company_name, sector FROM {cfg.T_TICKERS} WHERE symbol = %(s)s LIMIT 1", {"s": t})
+            if rows:
+                r = rows[0]
+                ticker_lines.append(f"- {t}: {r.get('company_name', '')} ({r.get('sector', '')})")
+            else:
+                ticker_lines.append(f"- {t}")
+        except Exception:
+            ticker_lines.append(f"- {t}")
 
     user = (
         f"Headline: {headline}\n\n"
@@ -67,22 +86,23 @@ def analyze(headline: str, body: str, tickers: List[str]) -> Dict[str, dict]:
         "Output the JSON now."
     )
 
-    try:
-        resp = _client().chat.completions.create(
-            model=cfg.MODEL_ENDPOINT,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": user},
-            ],
-            response_format={"type": "json_object"},
-            max_tokens=1024,
-            temperature=0.2,
-        )
-    except Exception as e:  # noqa: BLE001
-        log.warning("Serving endpoint call failed: %s", e)
-        return {}
+    client = _client()
+    log.info("Calling LLM endpoint %s for tickers %s", cfg.MODEL_ENDPOINT, tickers)
+
+    resp = client.chat.completions.create(
+        model=cfg.MODEL_ENDPOINT,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user},
+        ],
+        max_tokens=1024,
+        temperature=0.2,
+    )
 
     text = resp.choices[0].message.content or "{}"
+    # Strip markdown fences if present
+    text = re.sub(r"^```(?:json)?\s*", "", text.strip())
+    text = re.sub(r"\s*```$", "", text.strip())
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError:

@@ -12,8 +12,8 @@ from typing import Iterable, List, Optional
 
 import httpx
 
-from app import config as cfg
-from app.delta_store import execute, query
+import config as cfg
+from delta_store import execute, query
 
 log = logging.getLogger(__name__)
 
@@ -58,10 +58,7 @@ def list_subscriptions(include_secret: bool = False) -> List[dict]:
 
 
 def delete_subscription(sub_id: str) -> bool:
-    # Hard-delete. For an audit trail, flip `active` to false instead.
     execute(f"DELETE FROM {cfg.T_WEBHOOKS} WHERE id = %(id)s", {"id": sub_id})
-    # databricks-sql-connector doesn't reliably report rowcount for deletes, so
-    # we check by re-reading.
     remaining = query(
         f"SELECT id FROM {cfg.T_WEBHOOKS} WHERE id = %(id)s", {"id": sub_id}
     )
@@ -108,8 +105,8 @@ def dispatch(impacts: Iterable[dict]) -> None:
                     continue
                 headers = {
                     "content-type": "application/json",
-                    "x-newsimpact-signature": _sign(body, sub["secret"]),
-                    "x-newsimpact-event": "impact.created",
+                    "x-lakesignal-signature": _sign(body, sub["secret"]),
+                    "x-lakesignal-event": "impact.created",
                 }
                 try:
                     resp = client.post(sub["url"], content=body, headers=headers)

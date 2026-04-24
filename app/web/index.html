@@ -3,214 +3,619 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NewsImpact — live</title>
+<title>LakeSignal — live</title>
 <style>
   :root {
-    --bg: #0b0d10;
-    --panel: #14171c;
-    --panel-2: #1b1f26;
-    --text: #e7ecf1;
-    --muted: #8a93a0;
-    --pos: #22c55e;
-    --neg: #ef4444;
-    --neu: #94a3b8;
-    --accent: #60a5fa;
-    --border: #242a33;
+    --bg: #0b0d10; --panel: #14171c; --panel-2: #1b1f26; --panel-3: #222830;
+    --text: #e7ecf1; --muted: #8a93a0; --dim: #555d6b;
+    --pos: #22c55e; --pos-bg: rgba(34,197,94,0.08);
+    --neg: #ef4444; --neg-bg: rgba(239,68,68,0.08);
+    --neu: #94a3b8; --neu-bg: rgba(148,163,184,0.06);
+    --accent: #60a5fa; --accent-bg: rgba(96,165,250,0.08);
+    --border: #242a33; --border-2: #2e343d;
+    --radius: 8px;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; }
   body {
-    margin: 0; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg); color: var(--text);
   }
+
+  /* HEADER */
   header {
-    padding: 16px 24px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 24px;
+    padding: 14px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
   }
-  header h1 { margin: 0; font-size: 18px; letter-spacing: 0.3px; }
-  header .tag { color: var(--muted); font-size: 12px; }
+  header h1 { font-size: 17px; letter-spacing: 0.4px; font-weight: 700; }
+  header h1 span { color: var(--accent); }
+  header .pill {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 3px 8px; border-radius: 99px; font-weight: 600;
+    background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(96,165,250,0.2);
+  }
+  header .spacer { flex: 1; }
+  #status { color: var(--muted); font-size: 11px; }
+
+  /* STAT CARDS */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .stat-card {
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); }
+  .stat-card .value { font-size: 22px; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .stat-card .sub { font-size: 11px; color: var(--dim); }
+  .stat-card.positive .value { color: var(--pos); }
+  .stat-card.negative .value { color: var(--neg); }
+
+  /* CONTROLS */
   .controls {
-    padding: 16px 24px; display: flex; gap: 12px; flex-wrap: wrap;
+    padding: 12px 24px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
     border-bottom: 1px solid var(--border); background: var(--panel);
   }
   .controls input, .controls select {
     background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-    padding: 7px 10px; border-radius: 6px; font: inherit;
+    padding: 6px 10px; border-radius: 6px; font: inherit; font-size: 12px;
   }
+  .controls input:focus, .controls select:focus { outline: none; border-color: var(--accent); }
   .controls button {
-    background: var(--accent); color: #0b0d10; border: 0; border-radius: 6px;
-    padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer;
+    border: 0; border-radius: 6px; padding: 6px 12px; font: inherit; font-size: 12px;
+    font-weight: 600; cursor: pointer; transition: opacity 0.15s;
   }
-  .controls button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
-  main { padding: 24px; max-width: 1280px; margin: 0 auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
-  th { color: var(--muted); font-weight: 500; background: var(--panel); position: sticky; top: 0; }
+  .controls button:hover { opacity: 0.85; }
+  .btn-primary { background: var(--accent); color: #0b0d10; }
+  .btn-secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border) !important; }
+  .btn-ghost { background: transparent; color: var(--muted); padding: 6px 8px; }
+  .btn-ghost.active { color: var(--accent); background: var(--accent-bg); }
+  .time-filters { display: flex; gap: 2px; background: var(--panel-2); border-radius: 6px; padding: 2px; border: 1px solid var(--border); }
+  .time-filters button { border-radius: 4px; font-size: 11px; padding: 4px 10px; }
+  .sep { width: 1px; background: var(--border); margin: 0 4px; align-self: stretch; }
+
+  /* TABLE */
+  main { padding: 0 24px 24px; max-width: 1600px; margin: 0 auto; }
+  .table-wrap { overflow-x: auto; margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 8px 10px; text-align: left; vertical-align: top; }
+  th {
+    color: var(--muted); font-weight: 600; background: var(--panel); position: sticky; top: 0;
+    cursor: pointer; user-select: none; font-size: 11px;
+    letter-spacing: 0.3px; white-space: nowrap;
+    border-bottom: 2px solid var(--border);
+  }
+  th:hover { color: var(--text); }
+  th .sort-arrow { display: inline-block; margin-left: 3px; font-size: 9px; opacity: 0.3; }
+  th.sort-asc .sort-arrow, th.sort-desc .sort-arrow { opacity: 1; color: var(--accent); }
+  th.sort-asc .sort-arrow::after { content: "\25B2"; }
+  th.sort-desc .sort-arrow::after { content: "\25BC"; }
+  th:not(.sort-asc):not(.sort-desc) .sort-arrow::after { content: "\25B4\25BE"; }
+  td { border-bottom: 1px solid var(--border); }
   tr:hover td { background: var(--panel); }
-  .dir { font-weight: 600; }
+  tr.expanded td { background: var(--panel-2); border-bottom: none; }
+  tr.rationale-row td {
+    background: var(--panel-2); padding: 0 10px 12px 40px;
+    font-size: 12px; color: var(--muted); line-height: 1.6; border-bottom: 1px solid var(--border);
+  }
+  tr.rationale-row .rationale-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--dim); margin-bottom: 2px; }
+
+  .dir { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
   .dir.positive { color: var(--pos); }
   .dir.negative { color: var(--neg); }
   .dir.neutral  { color: var(--neu); }
-  .ticker { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; }
-  .tags { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  .ticker {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700;
+    font-size: 12px; cursor: default;
+  }
+  .tags { display: inline-flex; gap: 3px; flex-wrap: wrap; }
   .tag-chip {
-    background: var(--panel-2); color: var(--muted); padding: 2px 7px; border-radius: 99px;
-    font-size: 11px; border: 1px solid var(--border);
+    background: var(--panel-3); color: var(--muted); padding: 2px 6px; border-radius: 4px;
+    font-size: 10px; border: 1px solid var(--border); white-space: nowrap;
   }
   .num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; text-align: right; }
   .mag-bar {
-    display: inline-block; width: 60px; height: 6px; background: var(--panel-2); border-radius: 3px;
-    overflow: hidden; vertical-align: middle; margin-right: 6px;
+    display: inline-block; width: 50px; height: 5px; background: var(--panel-3); border-radius: 3px;
+    overflow: hidden; vertical-align: middle; margin-right: 5px;
   }
-  .mag-bar > span { display: block; height: 100%; background: var(--accent); }
-  .headline-link { color: var(--text); text-decoration: none; }
+  .mag-bar > span { display: block; height: 100%; border-radius: 3px; }
+  .mag-bar.positive > span { background: var(--pos); }
+  .mag-bar.negative > span { background: var(--neg); }
+  .mag-bar.neutral > span { background: var(--neu); }
+  .headline-link { color: var(--text); text-decoration: none; font-size: 12px; }
   .headline-link:hover { color: var(--accent); }
-  .empty { padding: 40px; text-align: center; color: var(--muted); }
-  .footer { color: var(--muted); font-size: 12px; padding: 16px 24px; text-align: center; }
+  .expand-icon { color: var(--dim); font-size: 14px; cursor: pointer; transition: transform 0.15s; display: inline-block; }
+  .expand-icon.open { transform: rotate(90deg); color: var(--accent); }
+  .empty { padding: 48px; text-align: center; color: var(--muted); }
+  .footer { color: var(--dim); font-size: 11px; padding: 20px 24px; text-align: center; letter-spacing: 0.2px; }
+  .footer code { color: var(--muted); }
+
+  /* Tooltip */
+  .ticker-wrap { position: relative; }
+  .ticker-wrap .tooltip {
+    display: none; position: absolute; left: 0; top: 100%; z-index: 10;
+    background: var(--panel-3); border: 1px solid var(--border-2); border-radius: 6px;
+    padding: 8px 10px; font-size: 11px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+  .ticker-wrap:hover .tooltip { display: block; }
+  .tooltip .tt-name { color: var(--text); font-weight: 600; }
+  .tooltip .tt-sector { color: var(--muted); }
+
+  /* Column min-widths for readability */
+  th:nth-child(1) { width: 28px; }
+  th:nth-child(2) { min-width: 80px; }
+  th:nth-child(3) { min-width: 60px; }
+  th:nth-child(4) { min-width: 75px; }
+  th:nth-child(5) { min-width: 90px; }
+  th:nth-child(6) { min-width: 75px; }
+  th:nth-child(7) { min-width: 68px; }
+  th:nth-child(8) { min-width: 68px; }
+  th:nth-child(9) { min-width: 80px; }
+  th:nth-child(10) { min-width: 80px; }
+  th:nth-child(11) { min-width: 200px; }
+  th:nth-child(12) { min-width: 70px; }
+
+  nav{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);background:var(--panel);padding:0 24px}
+  nav .logo{font-size:16px;font-weight:700;padding:12px 16px 12px 0;border-right:1px solid var(--border);margin-right:8px}
+  nav .logo span{color:var(--accent)}
+  nav a{color:var(--muted);text-decoration:none;padding:12px 16px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:.15s}
+  nav a:hover{color:var(--text)}
+  nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+  .modal-overlay.open{display:flex}
+  .modal{background:#1b1f26;border:1px solid var(--border);border-radius:12px;padding:24px;width:90%;max-width:480px;box-shadow:0 12px 40px rgba(0,0,0,.8)}
+  .modal h3{font-size:16px;margin-bottom:16px;font-weight:700}
+  .modal label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:500}
+  .modal input{width:100%;background:var(--panel-3);color:var(--text);border:1px solid var(--border);padding:8px 10px;border-radius:6px;font:inherit;font-size:13px}
+  .modal input:focus{outline:none;border-color:var(--accent)}
+  .modal .actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+  .modal .actions button{padding:8px 16px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer;border:0}
+  .url-bar{padding:10px 24px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border);background:var(--panel)}
+  .url-bar input{flex:1;background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:6px;font:inherit;font-size:13px}
+  .url-bar input:focus{outline:none;border-color:var(--accent)}
+  .url-bar button{padding:8px 14px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer;border:0}
+  .url-bar .status-msg{font-size:12px;color:var(--muted);min-width:100px}
+  .url-bar .status-msg.success{color:var(--pos)}
+  .url-bar .status-msg.error{color:var(--neg)}
 </style>
 </head>
 <body>
-<header>
-  <h1>NewsImpact</h1>
-  <span class="tag">real-time news-to-ticker impact scoring</span>
-  <span class="tag" id="status"></span>
-</header>
+<nav>
+  <div class="logo">Lake<span>Signal</span></div>
+  <a href="/" class="active">Dashboard</a>
+  <a href="/backtest">Track Record</a>
+  <a href="/about">About</a>
+</nav>
+<div style="padding:0 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);background:var(--panel)">
+  <span class="pill" style="margin:8px 0">Live</span>
+  <span style="flex:1"></span>
+  <span id="status" style="color:var(--muted);font-size:11px"></span>
+</div>
 
+<!-- STAT CARDS -->
+<div class="stats" id="stats">
+  <div class="stat-card"><div class="label">Total impacts</div><div class="value" id="s-total">—</div><div class="sub" id="s-total-sub"></div></div>
+  <div class="stat-card"><div class="label">Avg magnitude</div><div class="value" id="s-mag">—</div><div class="sub" id="s-mag-sub"></div></div>
+  <div class="stat-card positive"><div class="label">Positive</div><div class="value" id="s-pos">—</div><div class="sub" id="s-pos-sub"></div></div>
+  <div class="stat-card negative"><div class="label">Negative</div><div class="value" id="s-neg">—</div><div class="sub" id="s-neg-sub"></div></div>
+  <div class="stat-card"><div class="label">Top ticker</div><div class="value" id="s-top">—</div><div class="sub" id="s-top-sub"></div></div>
+  <div class="stat-card"><div class="label">Sources</div><div class="value" id="s-src">—</div><div class="sub" id="s-src-sub"></div></div>
+</div>
+
+<!-- CONTROLS -->
 <div class="controls">
-  <input id="ticker" placeholder="Ticker (e.g. AAPL)" />
+  <div class="time-filters">
+    <button class="btn-ghost active" data-hours="">All</button>
+    <button class="btn-ghost" data-hours="1">1h</button>
+    <button class="btn-ghost" data-hours="6">6h</button>
+    <button class="btn-ghost" data-hours="24">24h</button>
+    <button class="btn-ghost" data-hours="168">7d</button>
+  </div>
+  <div class="sep"></div>
+  <input id="ticker" placeholder="Ticker" style="width:80px;" />
   <select id="direction">
     <option value="">All directions</option>
     <option value="positive">Positive</option>
     <option value="negative">Negative</option>
     <option value="neutral">Neutral</option>
   </select>
-  <input id="min_mag" type="number" min="1" max="10" placeholder="Min magnitude" style="width: 140px;" />
-  <button id="refresh">Refresh</button>
-  <button id="ingest" class="secondary">Run ingest now</button>
+  <input id="min_mag" type="number" min="1" max="10" placeholder="Min mag" style="width:80px;" />
+  <input id="search" placeholder="Search headlines..." style="width:180px;" />
+  <div class="sep"></div>
+  <button id="refresh" class="btn-primary">Refresh</button>
+  <button id="ingest" class="btn-secondary">Run ingest</button>
+  <button id="export" class="btn-secondary">Export CSV</button>
+  <button id="btn-add-ticker" class="btn-secondary">+ Add Ticker</button>
   <span style="flex:1"></span>
-  <label style="display:flex; align-items:center; gap:6px; color: var(--muted); font-size:12px;">
-    <input type="checkbox" id="auto" checked /> auto-refresh (30s)
+  <label style="display:flex; align-items:center; gap:5px; color: var(--muted); font-size:11px;">
+    <input type="checkbox" id="auto" checked /> auto-refresh 30s
   </label>
 </div>
 
+<div class="url-bar">
+  <span style="font-size:12px;color:var(--muted);white-space:nowrap">📎 Analyze URL:</span>
+  <input id="url-input" placeholder="Paste any news article URL and press Analyze..." />
+  <button class="btn-primary" id="btn-analyze-url">Analyze</button>
+  <span class="status-msg" id="url-status"></span>
+</div>
 <main>
+  <div class="table-wrap">
   <table>
     <thead>
       <tr>
-        <th>Time</th>
-        <th>Ticker</th>
-        <th>Dir</th>
-        <th>Mag</th>
-        <th class="num">Sent.</th>
-        <th class="num">1d %</th>
-        <th class="num">5d %</th>
-        <th class="num">Conf.</th>
-        <th>Risk tags</th>
-        <th>Headline</th>
-        <th>Source</th>
+        <th style="width:24px;cursor:default;"></th>
+        <th data-key="analyzed_at" data-type="string">Time <span class="sort-arrow"></span></th>
+        <th data-key="ticker" data-type="string">Ticker <span class="sort-arrow"></span></th>
+        <th data-key="direction" data-type="string">Direction <span class="sort-arrow"></span></th>
+        <th data-key="magnitude" data-type="number">Magnitude <span class="sort-arrow"></span></th>
+        <th data-key="sentiment_score" data-type="number" class="num">Sentiment <span class="sort-arrow"></span></th>
+        <th data-key="predicted_move_pct_1d" data-type="number" class="num">1-Day % <span class="sort-arrow"></span></th>
+        <th data-key="predicted_move_pct_5d" data-type="number" class="num">5-Day % <span class="sort-arrow"></span></th>
+        <th data-key="confidence" data-type="number" class="num">Confidence <span class="sort-arrow"></span></th>
+        <th data-key="risk_tags" data-type="string">Risk Tags <span class="sort-arrow"></span></th>
+        <th data-key="headline" data-type="string">Headline <span class="sort-arrow"></span></th>
+        <th data-key="source" data-type="string">Source <span class="sort-arrow"></span></th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
   </table>
-  <div id="empty" class="empty" hidden>No impacts yet. Either wait for the scheduler to poll news, or click <b>Run ingest now</b>.</div>
+  </div>
+  <div id="empty" class="empty" hidden>No impacts yet. Click <b>Run ingest</b> or wait for the scheduler.</div>
 </main>
 
-<div class="footer">Backed by the <code>/impacts</code> endpoint. Set <code>ANTHROPIC_API_KEY</code> to upgrade scoring from lexicon to Claude.</div>
+<div class="footer">
+  Powered by <code>databricks-claude-sonnet-4</code> via Foundation Model APIs &middot; Data in <code>lakesignal.core</code>
+</div>
 
 <script>
-const $ = (id) => document.getElementById(id);
-let timer = null;
+const $ = id => document.getElementById(id);
+let timer = null, currentData = [], tickerMeta = {};
+let sortKey = "analyzed_at", sortDir = "desc";
+let timeFilter = "";
 
+/* --- Ticker metadata for tooltips --- */
+async function loadTickerMeta() {
+  try {
+    const r = await fetch("/tickers?limit=600");
+    if (r.ok) {
+      const rows = await r.json();
+      rows.forEach(t => { tickerMeta[t.symbol] = t; });
+    }
+  } catch(e) {}
+}
+loadTickerMeta();
+
+/* --- Stats --- */
+function updateStats(data) {
+  $("s-total").textContent = data.length;
+  const tickers = new Set(data.map(r => r.ticker));
+  $("s-total-sub").textContent = `${tickers.size} tickers`;
+  if (data.length) {
+    const avg = data.reduce((s,r) => s + (r.magnitude||0), 0) / data.length;
+    $("s-mag").textContent = avg.toFixed(1);
+    const max = data.reduce((m,r) => Math.max(m, r.magnitude||0), 0);
+    $("s-mag-sub").textContent = `max ${max}`;
+  } else { $("s-mag").textContent = "—"; $("s-mag-sub").textContent = ""; }
+  const pos = data.filter(r => r.direction === "positive").length;
+  const neg = data.filter(r => r.direction === "negative").length;
+  const neu = data.filter(r => r.direction === "neutral").length;
+  $("s-pos").textContent = pos;
+  $("s-pos-sub").textContent = data.length ? `${Math.round(pos/data.length*100)}%` : "";
+  $("s-neg").textContent = neg;
+  $("s-neg-sub").textContent = data.length ? `${Math.round(neg/data.length*100)}%` : "";
+  // Top ticker
+  const counts = {};
+  data.forEach(r => { counts[r.ticker] = (counts[r.ticker]||0) + 1; });
+  const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+  $("s-top").textContent = top ? top[0] : "—";
+  $("s-top-sub").textContent = top ? `${top[1]} mentions` : "";
+  const srcs = new Set(data.map(r => r.source));
+  $("s-src").textContent = srcs.size;
+  $("s-src-sub").textContent = [...srcs].slice(0,3).join(", ");
+}
+
+/* --- Load data --- */
 async function load() {
   const params = new URLSearchParams();
   if ($("ticker").value.trim()) params.set("ticker", $("ticker").value.trim().toUpperCase());
   if ($("direction").value) params.set("direction", $("direction").value);
   if ($("min_mag").value) params.set("min_magnitude", $("min_mag").value);
-  params.set("limit", "150");
+  if (timeFilter) {
+    const since = new Date(Date.now() - parseInt(timeFilter)*3600000).toISOString();
+    params.set("since", since);
+  }
+  params.set("limit", "300");
 
-  $("status").textContent = "loading…";
+  $("status").textContent = "loading\u2026";
   try {
-    const res = await fetch(`/impacts?${params.toString()}`);
-    const data = await res.json();
-    render(data);
-    $("status").textContent = `showing ${data.length} · ${new Date().toLocaleTimeString()}`;
+    const res = await fetch(`/impacts?${params}`);
+    if (!res.ok) {
+      const t = await res.text();
+      $("status").textContent = `HTTP ${res.status}`;
+      $("empty").hidden = false;
+      $("empty").innerHTML = `<pre style="text-align:left;font-size:11px;color:#ef4444">${esc(t.substring(0,2000))}</pre>`;
+      return;
+    }
+    currentData = await res.json();
+    sortAndRender();
+    $("status").textContent = `${currentData.length} impacts \u00b7 ${new Date().toLocaleTimeString()}`;
   } catch (e) {
-    $("status").textContent = "error loading impacts";
+    $("status").textContent = `error: ${e.message}`;
   }
 }
 
-function fmtPct(x) {
-  if (x === null || x === undefined) return "";
-  const n = Number(x);
-  const sign = n > 0 ? "+" : "";
-  return sign + n.toFixed(2);
+/* --- Sort --- */
+function sortAndRender() {
+  let data = [...currentData];
+  // Client-side headline search
+  const q = ($("search").value || "").toLowerCase().trim();
+  if (q) data = data.filter(r => (r.headline||"").toLowerCase().includes(q) || (r.ticker||"").toLowerCase().includes(q));
+
+  data.sort((a, b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (Array.isArray(va)) va = va.join(",");
+    if (Array.isArray(vb)) vb = vb.join(",");
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    const th = document.querySelector(`th[data-key="${sortKey}"]`);
+    const dtype = th ? th.dataset.type : "string";
+    let cmp = dtype === "number" ? Number(va) - Number(vb) : String(va).localeCompare(String(vb));
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  updateStats(data);
+  render(data);
+  updateSortUI();
 }
 
-function fmtTime(iso) {
-  if (!iso) return "";
-  try {
-    const d = new Date(iso);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  } catch { return iso; }
+function updateSortUI() {
+  document.querySelectorAll("th[data-key]").forEach(th => {
+    th.classList.remove("sort-asc", "sort-desc");
+    if (th.dataset.key === sortKey) th.classList.add(sortDir === "asc" ? "sort-asc" : "sort-desc");
+  });
 }
 
+document.querySelector("thead").addEventListener("click", e => {
+  const th = e.target.closest("th[data-key]");
+  if (!th) return;
+  const key = th.dataset.key;
+  if (sortKey === key) { sortDir = sortDir === "asc" ? "desc" : "asc"; }
+  else { sortKey = key; sortDir = key === "analyzed_at" ? "desc" : "asc"; }
+  sortAndRender();
+});
+
+/* --- Render --- */
 function render(rows) {
   const tbody = $("rows");
   tbody.innerHTML = "";
   $("empty").hidden = rows.length > 0;
   for (const r of rows) {
     const tr = document.createElement("tr");
+    tr.dataset.impactId = r.impact_id;
     const magPct = Math.round((r.magnitude || 0) * 10);
-    const tagChips = (r.risk_tags || []).map(t => `<span class="tag-chip">${t}</span>`).join(" ");
+    const tags = Array.isArray(r.risk_tags) ? r.risk_tags : (r.risk_tags ? [r.risk_tags] : []);
+    const tagChips = tags.map(t => `<span class="tag-chip">${esc(String(t))}</span>`).join("");
+    const meta = tickerMeta[r.ticker];
+    const tooltip = meta ? `<div class="tooltip"><div class="tt-name">${esc(meta.company_name||"")}</div><div class="tt-sector">${esc(meta.sector||"")} &middot; ${esc(meta.industry||"")}</div></div>` : "";
+
     tr.innerHTML = `
-      <td title="${r.analyzed_at || ""}">${fmtTime(r.analyzed_at)}</td>
-      <td><span class="ticker">${r.ticker}</span></td>
-      <td class="dir ${r.direction}">${r.direction}</td>
-      <td><span class="mag-bar"><span style="width:${magPct}%"></span></span>${r.magnitude}</td>
-      <td class="num">${(r.sentiment_score ?? 0).toFixed(2)}</td>
-      <td class="num ${r.predicted_move_pct_1d > 0 ? 'dir positive' : r.predicted_move_pct_1d < 0 ? 'dir negative' : ''}">${fmtPct(r.predicted_move_pct_1d)}</td>
-      <td class="num ${r.predicted_move_pct_5d > 0 ? 'dir positive' : r.predicted_move_pct_5d < 0 ? 'dir negative' : ''}">${fmtPct(r.predicted_move_pct_5d)}</td>
-      <td class="num">${((r.confidence ?? 0) * 100).toFixed(0)}%</td>
+      <td><span class="expand-icon">\u25B6</span></td>
+      <td title="${r.analyzed_at||""}">${fmtTime(r.analyzed_at)}</td>
+      <td><div class="ticker-wrap"><span class="ticker">${r.ticker||""}</span>${tooltip}</div></td>
+      <td><span class="dir ${r.direction}">${r.direction}</span></td>
+      <td><span class="mag-bar ${r.direction}"><span style="width:${magPct}%"></span></span>${r.magnitude}</td>
+      <td class="num">${(r.sentiment_score??0).toFixed(2)}</td>
+      <td class="num ${r.predicted_move_pct_1d>0?'dir positive':r.predicted_move_pct_1d<0?'dir negative':''}">${fmtPct(r.predicted_move_pct_1d)}</td>
+      <td class="num ${r.predicted_move_pct_5d>0?'dir positive':r.predicted_move_pct_5d<0?'dir negative':''}">${fmtPct(r.predicted_move_pct_5d)}</td>
+      <td class="num">${((r.confidence??0)*100).toFixed(0)}%</td>
       <td><span class="tags">${tagChips}</span></td>
-      <td>${r.url ? `<a class="headline-link" href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.headline || "")}</a>` : escapeHtml(r.headline || "")}</td>
-      <td><span class="tag-chip">${r.source || ""}</span></td>
+      <td>${r.url?`<a class="headline-link" href="${r.url}" target="_blank" rel="noopener">${esc(r.headline||"")}</a>`:esc(r.headline||"")}</td>
+      <td><span class="tag-chip">${r.source||""}</span></td>
     `;
+    // Click to expand rationale
+    tr.addEventListener("click", () => toggleRationale(tr, r));
     tbody.appendChild(tr);
   }
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function toggleRationale(tr, r) {
+  const icon = tr.querySelector(".expand-icon");
+  const existing = tr.nextElementSibling;
+  if (existing && existing.classList.contains("rationale-row")) {
+    existing.remove();
+    tr.classList.remove("expanded");
+    icon.classList.remove("open");
+    return;
+  }
+  tr.classList.add("expanded");
+  icon.classList.add("open");
+  const rr = document.createElement("tr");
+  rr.className = "rationale-row";
+  const cols = tr.querySelectorAll("td").length;
+  rr.innerHTML = `<td colspan="${cols}"><div class="rationale-label">AI Rationale</div>${esc(r.rationale || "No rationale available.")}</td>`;
+  tr.after(rr);
 }
 
+/* --- Helpers --- */
+function fmtPct(x) {
+  if (x==null) return "";
+  const n=Number(x), sign=n>0?"+":"";
+  return sign+n.toFixed(2);
+}
+function fmtTime(iso) {
+  if (!iso) return "";
+  try { const d=new Date(iso); return d.toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); } catch { return iso; }
+}
+function esc(s) { return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* --- CSV Export --- */
+function exportCSV() {
+  if (!currentData.length) return;
+  const cols = ["analyzed_at","ticker","direction","magnitude","sentiment_score","predicted_move_pct_1d","predicted_move_pct_5d","confidence","risk_tags","rationale","headline","source","url"];
+  const header = cols.join(",");
+  const rows = currentData.map(r =>
+    cols.map(c => {
+      let v = r[c];
+      if (Array.isArray(v)) v = v.join("; ");
+      if (v == null) return "";
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    }).join(",")
+  );
+  const csv = [header, ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `lakesignal_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+/* --- Ingest --- */
 async function runIngest() {
-  $("status").textContent = "ingesting…";
+  $("status").textContent = "ingesting\u2026";
   $("ingest").disabled = true;
   try {
     const res = await fetch("/ingest/run", { method: "POST" });
     const d = await res.json();
     $("status").textContent = `ingested ${d.new_impacts} new impacts`;
     await load();
-  } catch (e) {
-    $("status").textContent = "ingest failed";
-  } finally {
-    $("ingest").disabled = false;
-  }
+  } catch (e) { $("status").textContent = "ingest failed"; }
+  finally { $("ingest").disabled = false; }
 }
 
+/* --- Time filter buttons --- */
+document.querySelectorAll(".time-filters button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".time-filters button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    timeFilter = btn.dataset.hours;
+    load();
+  });
+});
+
+/* --- Auto-refresh --- */
 function resetAuto() {
   if (timer) clearInterval(timer);
   if ($("auto").checked) timer = setInterval(load, 30000);
 }
 
+/* --- Events --- */
 $("refresh").addEventListener("click", load);
 $("ingest").addEventListener("click", runIngest);
+$("export").addEventListener("click", exportCSV);
 $("ticker").addEventListener("change", load);
 $("direction").addEventListener("change", load);
 $("min_mag").addEventListener("change", load);
 $("auto").addEventListener("change", resetAuto);
+let searchTimer = null;
+$("search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(sortAndRender, 200); });
 
 load();
 resetAuto();
+</script>
+
+<!-- Add Ticker Modal -->
+<div class="modal-overlay" id="ticker-modal">
+  <div class="modal">
+    <h3>Add Custom Ticker</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Add any stock ticker to the LakeSignal universe. It will be tracked in all future news scans.</p>
+    <label>Symbol *</label>
+    <input id="m-symbol" placeholder="e.g. RIVN, PLTR, COIN" style="text-transform:uppercase" />
+    <label>Company Name</label>
+    <input id="m-company" placeholder="e.g. Rivian Automotive" />
+    <label>Sector</label>
+    <input id="m-sector" placeholder="e.g. Consumer Cyclical" />
+    <label>Industry</label>
+    <input id="m-industry" placeholder="e.g. Auto Manufacturers" />
+    <label>Exchange</label>
+    <input id="m-exchange" placeholder="e.g. NASDAQ" />
+    <div class="actions">
+      <button class="btn-secondary" id="m-cancel" style="border:1px solid var(--border)">Cancel</button>
+      <button class="btn-primary" id="m-save">Add Ticker</button>
+    </div>
+    <div id="m-status" style="font-size:12px;margin-top:8px"></div>
+  </div>
+</div>
+
+<script>
+// --- Add Ticker Modal ---
+$("btn-add-ticker").addEventListener("click", () => $("ticker-modal").classList.add("open"));
+$("m-cancel").addEventListener("click", () => { $("ticker-modal").classList.remove("open"); $("m-status").textContent = ""; });
+$("ticker-modal").addEventListener("click", e => { if (e.target === $("ticker-modal")) { $("ticker-modal").classList.remove("open"); $("m-status").textContent = ""; }});
+
+$("m-save").addEventListener("click", async () => {
+  const sym = $("m-symbol").value.trim().toUpperCase();
+  if (!sym) { $("m-status").style.color = "var(--neg)"; $("m-status").textContent = "Symbol is required"; return; }
+  $("m-save").disabled = true;
+  $("m-status").style.color = "var(--muted)";
+  $("m-status").textContent = "Adding...";
+  try {
+    const r = await fetch("/tickers", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        symbol: sym,
+        company_name: $("m-company").value.trim(),
+        sector: $("m-sector").value.trim(),
+        industry: $("m-industry").value.trim(),
+        exchange: $("m-exchange").value.trim(),
+      })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      $("m-status").style.color = "var(--pos)";
+      $("m-status").textContent = `\u2713 ${sym} added! It will appear in future scans.`;
+      $("m-symbol").value = ""; $("m-company").value = ""; $("m-sector").value = ""; $("m-industry").value = ""; $("m-exchange").value = "";
+      loadTickerMeta(); // refresh ticker cache
+      setTimeout(() => $("ticker-modal").classList.remove("open"), 1500);
+    } else {
+      $("m-status").style.color = "var(--neg)";
+      $("m-status").textContent = d.detail || "Failed to add ticker";
+    }
+  } catch(e) { $("m-status").style.color = "var(--neg)"; $("m-status").textContent = e.message; }
+  finally { $("m-save").disabled = false; }
+});
+
+// --- Analyze URL ---
+$("btn-analyze-url").addEventListener("click", analyzeUrl);
+$("url-input").addEventListener("keydown", e => { if (e.key === "Enter") analyzeUrl(); });
+
+async function analyzeUrl() {
+  const url = $("url-input").value.trim();
+  if (!url) { $("url-status").className = "status-msg error"; $("url-status").textContent = "Paste a URL first"; return; }
+  $("btn-analyze-url").disabled = true;
+  $("url-status").className = "status-msg";
+  $("url-status").textContent = "Fetching & analyzing...";
+  try {
+    const r = await fetch("/analyze/url", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ url, persist: true })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      const n = d.persisted ? d.persisted.length : Object.keys(d.impacts || {}).length;
+      if (n > 0) {
+        $("url-status").className = "status-msg success";
+        $("url-status").textContent = `\u2713 ${n} impact(s) scored for ${d.tickers.join(", ")}`;
+        $("url-input").value = "";
+        setTimeout(load, 500); // refresh table
+      } else {
+        $("url-status").className = "status-msg error";
+        const msg = d.note || (d.tickers && d.tickers.length > 0 ? `Found ${d.tickers.join(", ")} but scoring failed` : "No tickers found in article.");
+        $("url-status").textContent = msg;
+      }
+    } else {
+      $("url-status").className = "status-msg error";
+      $("url-status").textContent = d.detail || `HTTP ${r.status}`;
+    }
+  } catch(e) { $("url-status").className = "status-msg error"; $("url-status").textContent = e.message; }
+  finally { $("btn-analyze-url").disabled = false; }
+}
 </script>
 </body>
 </html>

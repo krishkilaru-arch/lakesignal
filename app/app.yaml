@@ -1,13 +1,13 @@
 command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 env:
-  - name: NEWSIMPACT_CATALOG
-    value: newsimpact
-  - name: NEWSIMPACT_SCHEMA
+  - name: LAKESIGNAL_CATALOG
+    value: lakesignal
+  - name: LAKESIGNAL_SCHEMA
     value: core
-  - name: NEWSIMPACT_MODEL
+  - name: LAKESIGNAL_MODEL
     value: databricks-claude-sonnet-4
-  # Set these in the Apps UI (or via `databricks apps update`):
-  #   DATABRICKS_WAREHOUSE_ID   — the SQL Warehouse this app queries through
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: 2303df3a9d62fe19
   # DATABRICKS_HOST and the service-principal OAuth token are provided
   # automatically by the Apps runtime.

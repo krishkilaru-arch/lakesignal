@@ -6,8 +6,8 @@ import threading
 import time
 from typing import Dict, List, Tuple
 
-from app import config as cfg
-from app.delta_store import query
+import config as cfg
+from delta_store import query
 
 AMBIGUOUS_WHEN_BARE = {"A", "T", "V", "C", "F", "GE", "GM", "MS", "UA", "USA", "US", "NY", "AI", "IT"}
 

@@ -15,12 +15,12 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install --quiet feedparser==6.0.11 openai==1.51.0
+# MAGIC %pip install --quiet feedparser==6.0.11 openai>=1.60.0
 # MAGIC dbutils.library.restartPython()
 
 # COMMAND ----------
 
-dbutils.widgets.text("catalog", "newsimpact", "Catalog")
+dbutils.widgets.text("catalog", "lakesignal", "Catalog")
 dbutils.widgets.text("schema", "core", "Schema")
 dbutils.widgets.text("model_endpoint", "databricks-claude-sonnet-4", "Serving endpoint")
 dbutils.widgets.text("max_events_per_run", "50", "Max events to score per run")
@@ -29,7 +29,7 @@ CATALOG = dbutils.widgets.get("catalog")
 SCHEMA = dbutils.widgets.get("schema")
 MODEL_ENDPOINT = dbutils.widgets.get("model_endpoint")
 MAX_EVENTS = int(dbutils.widgets.get("max_events_per_run"))
-MODEL_VERSION = f"newsimpact-0.1-{MODEL_ENDPOINT}"
+MODEL_VERSION = f"lakesignal-0.1-{MODEL_ENDPOINT}"
 
 T_TICKERS = f"{CATALOG}.{SCHEMA}.tickers"
 T_NEWS = f"{CATALOG}.{SCHEMA}.news_events"
@@ -301,7 +301,7 @@ SYSTEM = """You are a sell-side equity analyst. Given one news story and a list 
 potentially-impacted tickers, score the likely short-term stock impact for each ticker.
 Be calibrated, not dramatic: most stories are low-magnitude.
 
-Return ONLY valid JSON matching this schema:
+Return ONLY valid JSON matching this schema (no prose, no markdown fences):
 
 {
   "impacts": [
@@ -335,11 +335,13 @@ def score(headline, body, tickers):
     resp = client.chat.completions.create(
         model=MODEL_ENDPOINT,
         messages=[{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
-        response_format={"type": "json_object"},
         max_tokens=1024,
         temperature=0.2,
     )
     text = resp.choices[0].message.content or "{}"
+    # Strip markdown fences if present
+    text = re.sub(r"^```(?:json)?\s*", "", text.strip())
+    text = re.sub(r"\s*```$", "", text.strip())
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError:

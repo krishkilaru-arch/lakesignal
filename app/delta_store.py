@@ -13,7 +13,7 @@ from typing import Any, Iterable, List, Optional
 from databricks import sql
 from databricks.sdk.core import Config
 
-from app import config as cfg
+import config as cfg
 
 log = logging.getLogger(__name__)
 
@@ -30,12 +30,10 @@ def _server_hostname() -> str:
 def _token_provider():
     """Return a fresh OAuth access token using the default credential chain."""
     c = Config()
-    # The SDK's token is callable; we fetch a string each time.
     hdr = c.authenticate()
     auth = hdr.get("Authorization", "")
     if auth.lower().startswith("bearer "):
         return auth[7:]
-    # Fall back to env token (personal access token) if present.
     import os
 
     return os.getenv("DATABRICKS_TOKEN", "")
@@ -60,12 +58,33 @@ def _conn():
         conn.close()
 
 
+def _safe_value(v: Any) -> Any:
+    """Convert connector types to JSON-safe Python primitives."""
+    if v is None or isinstance(v, (str, int, float, bool)):
+        return v
+    if isinstance(v, (list, tuple)):
+        return [_safe_value(x) for x in v]
+    if hasattr(v, "isoformat"):
+        return v.isoformat()
+    if isinstance(v, bytes):
+        return v.decode("utf-8", errors="replace")
+    # Handle custom iterables from the connector (e.g. ARRAY<STRING>)
+    try:
+        return [_safe_value(x) for x in v]
+    except TypeError:
+        pass
+    return str(v)
+
+
 def query(statement: str, params: Optional[dict] = None) -> List[dict]:
-    """Run a SELECT; return rows as dicts."""
+    """Run a SELECT; return rows as dicts with JSON-safe values."""
     with _conn() as c, c.cursor() as cur:
         cur.execute(statement, params or {})
         cols = [d[0] for d in cur.description] if cur.description else []
-        return [dict(zip(cols, row)) for row in cur.fetchall()]
+        return [
+            {k: _safe_value(v) for k, v in zip(cols, row)}
+            for row in cur.fetchall()
+        ]
 
 
 def execute(statement: str, params: Optional[dict] = None) -> int:

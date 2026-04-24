@@ -1,13 +1,13 @@
 {
-  "name": "newsimpact_ingest_and_score",
+  "name": "lakesignal_ingest_and_score",
   "format": "MULTI_TASK",
   "tasks": [
     {
       "task_key": "ingest_and_score",
       "notebook_task": {
-        "notebook_path": "/Workspace/Users/REPLACE_WITH_YOUR_EMAIL/newsimpact/notebooks/01_ingest_and_score",
+        "notebook_path": "/Workspace/Users/krish.kilaru@lumenalta.com/lakesignal/notebooks/01_ingest_and_score",
         "base_parameters": {
-          "catalog": "newsimpact",
+          "catalog": "lakesignal",
           "schema": "core",
           "model_endpoint": "databricks-claude-sonnet-4",
           "max_events_per_run": "50"
@@ -28,7 +28,7 @@
       },
       "libraries": [
         { "pypi": { "package": "feedparser==6.0.11" } },
-        { "pypi": { "package": "openai==1.51.0" } }
+        { "pypi": { "package": "openai>=1.60.0" } }
       ],
       "timeout_seconds": 900,
       "max_retries": 1,
@@ -45,7 +45,7 @@
     "on_failure": []
   },
   "tags": {
-    "project": "newsimpact",
+    "project": "lakesignal",
     "env": "prototype"
   }
 }

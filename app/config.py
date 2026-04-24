@@ -3,16 +3,16 @@ from __future__ import annotations
 
 import os
 
-CATALOG = os.getenv("NEWSIMPACT_CATALOG", "newsimpact")
-SCHEMA = os.getenv("NEWSIMPACT_SCHEMA", "core")
+CATALOG = os.getenv("LAKESIGNAL_CATALOG", "lakesignal")
+SCHEMA = os.getenv("LAKESIGNAL_SCHEMA", "core")
 
 T_TICKERS = f"{CATALOG}.{SCHEMA}.tickers"
 T_NEWS = f"{CATALOG}.{SCHEMA}.news_events"
 T_IMPACT = f"{CATALOG}.{SCHEMA}.impact_analysis"
 T_WEBHOOKS = f"{CATALOG}.{SCHEMA}.webhook_subscriptions"
 
-MODEL_ENDPOINT = os.getenv("NEWSIMPACT_MODEL", "databricks-claude-sonnet-4")
-MODEL_VERSION = f"newsimpact-0.1-{MODEL_ENDPOINT}"
+MODEL_ENDPOINT = os.getenv("LAKESIGNAL_MODEL", "databricks-claude-sonnet-4")
+MODEL_VERSION = f"lakesignal-0.1-{MODEL_ENDPOINT}"
 
 # Populated by the Databricks Apps runtime.
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST", "").rstrip("/")

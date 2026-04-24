@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LakeSignal — Track Record</title>
+<style>
+:root{--bg:#0b0d10;--panel:#14171c;--panel-2:#1b1f26;--panel-3:#222830;--text:#e7ecf1;--muted:#8a93a0;--dim:#555d6b;--pos:#22c55e;--pos-bg:rgba(34,197,94,.08);--neg:#ef4444;--neg-bg:rgba(239,68,68,.08);--neu:#94a3b8;--accent:#60a5fa;--accent-bg:rgba(96,165,250,.08);--border:#242a33;--border-2:#2e343d;--radius:8px;--gold:#f59e0b}
+*{box-sizing:border-box;margin:0}
+body{font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+nav{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);background:var(--panel);padding:0 24px}
+nav .logo{font-size:16px;font-weight:700;padding:12px 16px 12px 0;border-right:1px solid var(--border);margin-right:8px}
+nav .logo span{color:var(--accent)}
+nav a{color:var(--muted);text-decoration:none;padding:12px 16px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:.15s}
+nav a:hover{color:var(--text)}
+nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.top-bar{padding:16px 24px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);background:var(--panel);flex-wrap:wrap}
+.top-bar h2{font-size:16px;font-weight:700}
+.top-bar h2 span{color:var(--accent)}
+.top-bar input[type=date]{background:var(--panel-2);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:6px;font:inherit}
+.top-bar button{background:var(--accent);color:#0b0d10;border:0;border-radius:6px;padding:6px 14px;font:inherit;font-weight:600;cursor:pointer}
+.top-bar .spacer{flex:1}
+#status{color:var(--muted);font-size:11px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 24px;border-bottom:1px solid var(--border)}
+.stat{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.stat .label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:4px}
+.stat .value{font-size:28px;font-weight:800;font-family:ui-monospace,monospace}
+.stat .sub{font-size:11px;color:var(--dim);margin-top:2px}
+.stat.green .value{color:var(--pos)}
+.stat.red .value{color:var(--neg)}
+.stat.gold .value{color:var(--gold)}
+.stat.blue .value{color:var(--accent)}
+
+.section{padding:20px 24px;max-width:1400px;margin:0 auto}
+.section-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title .badge{font-size:11px;background:var(--accent-bg);color:var(--accent);padding:2px 8px;border-radius:99px;font-weight:600}
+
+/* Proof table */
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 10px;text-align:left;color:var(--muted);font-weight:600;background:var(--panel);border-bottom:2px solid var(--border);font-size:11px;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--text)}
+th .sa{display:inline-block;margin-left:3px;font-size:9px;opacity:.3}
+th.sort-asc .sa,th.sort-desc .sa{opacity:1;color:var(--accent)}
+th.sort-asc .sa::after{content:"\25B2"}
+th.sort-desc .sa::after{content:"\25BC"}
+th:not(.sort-asc):not(.sort-desc) .sa::after{content:"\25B4\25BE"}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:var(--panel)}
+.ticker{font-family:ui-monospace,monospace;font-weight:700}
+.dir{font-weight:700;font-size:11px}
+.dir.positive{color:var(--pos)}
+.dir.negative{color:var(--neg)}
+.dir.neutral{color:var(--neu)}
+.num{font-family:ui-monospace,monospace;text-align:right}
+.verdict{font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;display:inline-block}
+.verdict.correct{background:var(--pos-bg);color:var(--pos);border:1px solid rgba(34,197,94,.2)}
+.verdict.wrong{background:var(--neg-bg);color:var(--neg);border:1px solid rgba(239,68,68,.2)}
+.verdict.pending{background:var(--accent-bg);color:var(--muted);border:1px solid rgba(96,165,250,.15)}
+.bar-cell{position:relative;min-width:120px}
+.bar-bg{position:absolute;top:50%;transform:translateY(-50%);height:6px;border-radius:3px;opacity:.3}
+.bar-fg{position:absolute;top:50%;transform:translateY(-50%);height:6px;border-radius:3px}
+.headline-sm{font-size:11px;color:var(--muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{padding:60px;text-align:center;color:var(--muted)}
+.empty .big{font-size:48px;margin-bottom:12px}
+.empty p{max-width:400px;margin:0 auto;line-height:1.7}
+
+/* Ticker cards */
+.ticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.ticker-card{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.ticker-card .left .sym{font-family:ui-monospace,monospace;font-weight:700;font-size:14px}
+.ticker-card .left .cnt{font-size:11px;color:var(--dim)}
+.ticker-card .right{text-align:right}
+.ticker-card .right .pct{font-size:18px;font-weight:800;font-family:ui-monospace,monospace}
+.ticker-card .right .pct.good{color:var(--pos)}
+.ticker-card .right .pct.bad{color:var(--neg)}
+.ticker-card .right .pct.na{color:var(--dim)}
+.footer{color:var(--dim);font-size:11px;padding:24px;text-align:center}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Lake<span>Signal</span></div>
+  <a href="/">Dashboard</a>
+  <a href="/backtest" class="active">Track Record</a>
+  <a href="/about">About</a>
+</nav>
+
+<div class="top-bar">
+  <h2>Forecast vs <span>Actual</span></h2>
+  <input type="date" id="pick-date" />
+  <button id="btn-load">Load</button>
+  <button id="btn-prev" style="background:var(--panel-2);color:var(--text);border:1px solid var(--border)">&#9664; Prev Day</button>
+  <button id="btn-next" style="background:var(--panel-2);color:var(--text);border:1px solid var(--border)">Next Day &#9654;</button>
+  <div class="spacer"></div>
+  <span id="status"></span>
+</div>
+
+<div class="stats" id="stats-row">
+  <div class="stat green"><div class="label">Direction Accuracy</div><div class="value" id="s-acc">—</div><div class="sub" id="s-acc-sub"></div></div>
+  <div class="stat blue"><div class="label">Predictions</div><div class="value" id="s-total">—</div><div class="sub" id="s-total-sub"></div></div>
+  <div class="stat green"><div class="label">Correct</div><div class="value" id="s-correct">—</div><div class="sub" id="s-correct-sub"></div></div>
+  <div class="stat red"><div class="label">Wrong</div><div class="value" id="s-wrong">—</div><div class="sub" id="s-wrong-sub"></div></div>
+  <div class="stat gold"><div class="label">Avg Magnitude Error</div><div class="value" id="s-err">—</div><div class="sub" id="s-err-sub">predicted vs actual %</div></div>
+  <div class="stat"><div class="label">Pending</div><div class="value" id="s-pend">—</div><div class="sub" id="s-pend-sub">awaiting market close</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Per-Ticker Scorecard <span class="badge" id="ticker-count"></span></div>
+  <div class="ticker-grid" id="ticker-grid"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Detailed Predictions <span class="badge" id="detail-count"></span></div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr>
+      <th data-k="ticker">Ticker <span class="sa"></span></th>
+      <th data-k="direction_predicted">Predicted <span class="sa"></span></th>
+      <th data-k="predicted_move_1d" class="num">Forecast 1d% <span class="sa"></span></th>
+      <th data-k="actual_move_1d_pct" class="num">Actual 1d% <span class="sa"></span></th>
+      <th data-k="magnitude_error_1d" class="num">Error <span class="sa"></span></th>
+      <th data-k="direction_correct_1d">Verdict <span class="sa"></span></th>
+      <th data-k="confidence" class="num">Conf <span class="sa"></span></th>
+      <th data-k="headline">Headline <span class="sa"></span></th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  </div>
+  <div id="empty" class="empty" hidden>
+    <div class="big">📈</div>
+    <p>No backtest data for this date yet. Predictions are scored after market close. Select a previous date or check back tomorrow.</p>
+  </div>
+</div>
+
+<div class="footer">
+  LakeSignal backtests every prediction against real stock prices. Accuracy is computed daily after market close (4 PM ET).
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let data=[],sortKey="direction_correct_1d",sortDir="desc";
+
+function today(){return new Date().toISOString().slice(0,10)}
+function addDays(ds,n){const d=new Date(ds+"T12:00:00");d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
+
+$("pick-date").value = today();
+
+async function load(){
+  const dt=$("pick-date").value;
+  $("status").textContent="loading...";
+  try{
+    const r=await fetch(`/backtest/results?event_date=${dt}`);
+    if(!r.ok){$("status").textContent=`HTTP ${r.status}`;return}
+    data=await r.json();
+    updateStats();
+    updateTickers();
+    sortAndRender();
+    $("status").textContent=`${data.length} predictions for ${dt}`;
+  }catch(e){$("status").textContent=`error: ${e.message}`}
+}
+
+function updateStats(){
+  const scored=data.filter(r=>r.direction_correct_1d!==null);
+  const correct=scored.filter(r=>r.direction_correct_1d===true);
+  const wrong=scored.filter(r=>r.direction_correct_1d===false);
+  const pending=data.filter(r=>r.actual_move_1d_pct===null);
+  const acc=scored.length? (correct.length/scored.length*100):0;
+  $("s-acc").textContent=scored.length?acc.toFixed(0)+"%":"—";
+  $("s-acc-sub").textContent=scored.length?`${correct.length} of ${scored.length} correct`:"";
+  // Color the accuracy stat
+  const accStat=$("s-acc").closest(".stat");
+  accStat.className="stat "+(acc>=60?"green":acc>=40?"gold":"red");
+  $("s-total").textContent=data.length;
+  $("s-total-sub").textContent=`${new Set(data.map(r=>r.ticker)).size} tickers`;
+  $("s-correct").textContent=correct.length;
+  $("s-correct-sub").textContent=scored.length?`${(correct.length/scored.length*100).toFixed(0)}% of scored`:"";
+  $("s-wrong").textContent=wrong.length;
+  $("s-wrong-sub").textContent=scored.length?`${(wrong.length/scored.length*100).toFixed(0)}% of scored`:"";
+  const errs=data.filter(r=>r.magnitude_error_1d!=null).map(r=>r.magnitude_error_1d);
+  $("s-err").textContent=errs.length?(errs.reduce((a,b)=>a+b,0)/errs.length).toFixed(2)+"%":"—";
+  $("s-pend").textContent=pending.length;
+}
+
+function updateTickers(){
+  const map={};
+  data.forEach(r=>{
+    if(!map[r.ticker])map[r.ticker]={total:0,correct:0,scored:0};
+    map[r.ticker].total++;
+    if(r.direction_correct_1d!==null){map[r.ticker].scored++;if(r.direction_correct_1d)map[r.ticker].correct++}
+  });
+  const sorted=Object.entries(map).sort((a,b)=>b[1].total-a[1].total);
+  $("ticker-count").textContent=sorted.length+" tickers";
+  $("ticker-grid").innerHTML=sorted.map(([sym,s])=>{
+    const pct=s.scored?Math.round(s.correct/s.scored*100):-1;
+    const cls=pct<0?"na":pct>=60?"good":"bad";
+    return `<div class="ticker-card"><div class="left"><div class="sym">${sym}</div><div class="cnt">${s.total} prediction${s.total>1?"s":""}</div></div><div class="right"><div class="pct ${cls}">${pct>=0?pct+"%":"—"}</div></div></div>`;
+  }).join("");
+}
+
+function sortAndRender(){
+  const s=[...data].sort((a,b)=>{
+    let va=a[sortKey],vb=b[sortKey];
+    if(va==null&&vb==null)return 0;if(va==null)return 1;if(vb==null)return -1;
+    let c=typeof va==="number"?va-vb:String(va).localeCompare(String(vb));
+    return sortDir==="asc"?c:-c;
+  });
+  render(s);
+  document.querySelectorAll("th[data-k]").forEach(th=>{
+    th.classList.remove("sort-asc","sort-desc");
+    if(th.dataset.k===sortKey)th.classList.add(sortDir==="asc"?"sort-asc":"sort-desc");
+  });
+}
+
+document.querySelector("thead").addEventListener("click",e=>{
+  const th=e.target.closest("th[data-k]");if(!th)return;
+  const k=th.dataset.k;
+  if(sortKey===k)sortDir=sortDir==="asc"?"desc":"asc";
+  else{sortKey=k;sortDir="desc"}
+  sortAndRender();
+});
+
+function render(rows){
+  $("empty").hidden=rows.length>0;
+  $("detail-count").textContent=rows.length+" rows";
+  $("rows").innerHTML=rows.map(r=>{
+    const pred=r.predicted_move_1d!=null?fmtPct(r.predicted_move_1d):"—";
+    const actual=r.actual_move_1d_pct!=null?fmtPct(r.actual_move_1d_pct):"pending";
+    const err=r.magnitude_error_1d!=null?r.magnitude_error_1d.toFixed(2)+"%":"—";
+    let verdict="pending",vcls="pending";
+    if(r.direction_correct_1d===true){verdict="Correct";vcls="correct"}
+    else if(r.direction_correct_1d===false){verdict="Wrong";vcls="wrong"}
+    const actCls=r.actual_move_1d_pct>0?"dir positive":r.actual_move_1d_pct<0?"dir negative":"";
+    return `<tr>
+      <td><span class="ticker">${r.ticker}</span></td>
+      <td><span class="dir ${r.direction_predicted}">${r.direction_predicted}</span></td>
+      <td class="num ${r.predicted_move_1d>0?'dir positive':r.predicted_move_1d<0?'dir negative':''}">${pred}</td>
+      <td class="num ${actCls}">${actual}</td>
+      <td class="num">${err}</td>
+      <td><span class="verdict ${vcls}">${verdict}</span></td>
+      <td class="num">${r.confidence!=null?Math.round(r.confidence*100)+"%":"—"}</td>
+      <td><span class="headline-sm" title="${esc(r.headline||"")}">${esc((r.headline||"").substring(0,80))}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function fmtPct(x){if(x==null)return"—";const n=Number(x);return(n>0?"+":"")+n.toFixed(2)+"%"}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+$("btn-load").addEventListener("click",load);
+$("btn-prev").addEventListener("click",()=>{$("pick-date").value=addDays($("pick-date").value,-1);load()});
+$("btn-next").addEventListener("click",()=>{$("pick-date").value=addDays($("pick-date").value,1);load()});
+$("pick-date").addEventListener("change",load);
+
+load();
+</script>
+</body>
+</html>

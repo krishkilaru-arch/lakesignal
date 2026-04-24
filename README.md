@@ -1,7 +1,7 @@
-# NewsImpact on Databricks
+# LakeSignal on Databricks
 
-Databricks-native port of the NewsImpact prototype. Everything lives in Unity Catalog
-`newsimpact.core`, scoring runs through the `databricks-claude-sonnet-4` serving
+Databricks-native port of the LakeSignal prototype. Everything lives in Unity Catalog
+`lakesignal.core`, scoring runs through the `databricks-claude-sonnet-4` serving
 endpoint, and the FastAPI REST layer is packaged as a Databricks App.
 
 ## Components
@@ -11,7 +11,7 @@ endpoint, and the FastAPI REST layer is packaged as a Databricks App.
 | Bootstrap notebook | `notebooks/00_bootstrap.py` | Creates catalog, schema, Delta tables, seeds the ticker universe |
 | Ingest + score notebook | `notebooks/01_ingest_and_score.py` | Polls RSS feeds, resolves tickers, scores via `databricks-claude-sonnet-4`, MERGEs into Delta |
 | Query examples | `notebooks/02_query_examples.py` | Reference SQL and Python for downstream consumers |
-| Job | `job/newsimpact_job.json` | Scheduled run of the ingest+score notebook (every 5 min) |
+| Job | `job/lakesignal_job.json` | Scheduled run of the ingest+score notebook (every 5 min) |
 | App | `app/` | FastAPI app deployed as a Databricks App; same REST surface as the SQLite prototype, backed by Delta |
 | Ticker seed | `data/tickers_seed.csv` | 102 tickers used by the bootstrap notebook |
 
@@ -21,7 +21,7 @@ endpoint, and the FastAPI REST layer is packaged as a Databricks App.
   (pay-per-token) endpoint `databricks-claude-sonnet-4` available in your region.
 - A SQL Warehouse (Serverless recommended) — the App queries Delta through it.
 - `CREATE CATALOG` privilege on your metastore (or ask an admin to run the bootstrap cell
-  once and grant you `USE CATALOG` / `USE SCHEMA` / `ALL PRIVILEGES ON SCHEMA newsimpact.core`).
+  once and grant you `USE CATALOG` / `USE SCHEMA` / `ALL PRIVILEGES ON SCHEMA lakesignal.core`).
 - Databricks CLI ≥ 0.221 if you plan to deploy the Job and App from the command line.
 
 ## 1. Run the bootstrap notebook
@@ -29,10 +29,10 @@ endpoint, and the FastAPI REST layer is packaged as a Databricks App.
 Upload `notebooks/00_bootstrap.py` (Databricks → Workspace → Import) and run it on any
 cluster (serverless SQL or a small all-purpose cluster works). It will:
 
-1. Create catalog `newsimpact` and schema `newsimpact.core` if they don't exist.
+1. Create catalog `lakesignal` and schema `lakesignal.core` if they don't exist.
 2. Create four Delta tables: `tickers`, `news_events`, `impact_analysis`, `webhook_subscriptions`.
 3. Seed the ticker universe from `data/tickers_seed.csv` (upload the file to a workspace
-   volume or `dbfs:/FileStore/newsimpact/` first — the notebook shows both options).
+   volume or `dbfs:/FileStore/lakesignal/` first — the notebook shows both options).
 
 ## 2. Run the ingest + score notebook
 
@@ -49,10 +49,10 @@ It will:
 ## 3. Schedule it as a Job
 
 From the Databricks UI: **Workflows → Create Job → Python** and point it at the notebook,
-or import `job/newsimpact_job.json`:
+or import `job/lakesignal_job.json`:
 
 ```bash
-databricks jobs create --json @job/newsimpact_job.json
+databricks jobs create --json @job/lakesignal_job.json
 ```
 
 The example schedules the notebook every 5 minutes on a tiny job cluster. Tighten the
@@ -62,15 +62,15 @@ trigger or swap to continuous if you want lower latency.
 
 ```bash
 cd app
-databricks apps deploy --source-code-path . newsimpact
+databricks apps deploy --source-code-path . lakesignal
 ```
 
 The app's `app.yaml` runs `uvicorn main:app`. On first deploy, set these environment
 variables in the Databricks Apps UI (Settings → Environment):
 
-- `NEWSIMPACT_CATALOG` = `newsimpact`
-- `NEWSIMPACT_SCHEMA` = `core`
-- `NEWSIMPACT_MODEL` = `databricks-claude-sonnet-4`
+- `LAKESIGNAL_CATALOG` = `lakesignal`
+- `LAKESIGNAL_SCHEMA` = `core`
+- `LAKESIGNAL_MODEL` = `databricks-claude-sonnet-4`
 - `DATABRICKS_WAREHOUSE_ID` = the ID of the SQL Warehouse the app should query through
 - `DATABRICKS_HOST` — auto-populated by the Apps runtime (no action needed)
 
@@ -93,17 +93,17 @@ via `DefaultCredentialProvider` from the `databricks-sdk`.
 ## Data model
 
 ```sql
-newsimpact.core.tickers (
+lakesignal.core.tickers (
   symbol STRING, company_name STRING, sector STRING, industry STRING,
   aliases STRING, exchange STRING
 )
 
-newsimpact.core.news_events (
+lakesignal.core.news_events (
   event_id STRING, source STRING, url STRING, headline STRING, body STRING,
   published_at TIMESTAMP, ingested_at TIMESTAMP, content_hash STRING
 )
 
-newsimpact.core.impact_analysis (
+lakesignal.core.impact_analysis (
   impact_id STRING, event_id STRING, ticker_symbol STRING,
   direction STRING, sentiment_score DOUBLE, magnitude INT,
   predicted_move_pct_1d DOUBLE, predicted_move_pct_5d DOUBLE, confidence DOUBLE,
@@ -111,7 +111,7 @@ newsimpact.core.impact_analysis (
   analyzed_at TIMESTAMP, model_version STRING
 )
 
-newsimpact.core.webhook_subscriptions (
+lakesignal.core.webhook_subscriptions (
   id STRING, url STRING, secret STRING, filters STRING,
   active BOOLEAN, created_at TIMESTAMP
 )
@@ -122,7 +122,7 @@ newsimpact.core.webhook_subscriptions (
 The scoring call only depends on the endpoint name. In the notebook set
 `MODEL_ENDPOINT = "databricks-meta-llama-3-3-70b-instruct"` (or any other serving
 endpoint that honors `response_format={"type":"json_object"}`) and rerun. For the app,
-change `NEWSIMPACT_MODEL`.
+change `LAKESIGNAL_MODEL`.
 
 ## What's intentionally simple
 

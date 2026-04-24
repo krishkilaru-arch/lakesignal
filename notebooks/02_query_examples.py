@@ -1,6 +1,10 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "1"
+# ///
 # MAGIC %md
-# MAGIC # NewsImpact — Query Examples
+# MAGIC # LakeSignal — Query Examples
 # MAGIC
 # MAGIC Reference queries your trading apps / risk engine can use to consume the
 # MAGIC `impact_analysis` table.
@@ -13,7 +17,7 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("catalog", "newsimpact", "Catalog")
+dbutils.widgets.text("catalog", "lakesignal", "Catalog")
 dbutils.widgets.text("schema", "core", "Schema")
 CATALOG = dbutils.widgets.get("catalog")
 SCHEMA = dbutils.widgets.get("schema")
@@ -115,7 +119,7 @@ spark.sql(f"USE SCHEMA {SCHEMA}")
 # MAGIC ) as conn:
 # MAGIC     with conn.cursor() as cur:
 # MAGIC         cur.execute("""
-# MAGIC             SELECT * FROM newsimpact.core.impact_analysis
+# MAGIC             SELECT * FROM lakesignal.core.impact_analysis
 # MAGIC             WHERE ticker_symbol = ? AND analyzed_at > ?
 # MAGIC             ORDER BY analyzed_at
 # MAGIC         """, ("AAPL", "2026-04-23T00:00:00Z"))

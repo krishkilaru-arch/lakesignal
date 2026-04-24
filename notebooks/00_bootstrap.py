@@ -1,13 +1,17 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "1"
+# ///
 # MAGIC %md
-# MAGIC # NewsImpact — Bootstrap
+# MAGIC # LakeSignal — Bootstrap
 # MAGIC
 # MAGIC Creates the Unity Catalog objects and seeds the ticker universe.
 # MAGIC Run this once per workspace. Safe to re-run — everything is idempotent.
 # MAGIC
 # MAGIC **Creates**
-# MAGIC - Catalog `newsimpact`
-# MAGIC - Schema  `newsimpact.core`
+# MAGIC - Catalog `lakesignal`
+# MAGIC - Schema  `lakesignal.core`
 # MAGIC - Tables  `tickers`, `news_events`, `impact_analysis`, `webhook_subscriptions`
 # MAGIC - Loads `data/tickers_seed.csv` into `tickers`
 
@@ -18,11 +22,11 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("catalog", "newsimpact", "Catalog")
+dbutils.widgets.text("catalog", "lakesignal", "Catalog")
 dbutils.widgets.text("schema", "core", "Schema")
 dbutils.widgets.text(
     "tickers_csv_path",
-    "/Volumes/newsimpact/core/seed/tickers_seed.csv",
+    "/Volumes/lakesignal/core/seed/tickers_seed.csv",
     "Path to tickers_seed.csv (Volume or dbfs:/FileStore/…)",
 )
 
@@ -119,8 +123,8 @@ print("Delta tables ready.")
 # MAGIC Two ways to stage `tickers_seed.csv`:
 # MAGIC
 # MAGIC 1. **Volume (preferred)**: upload the file to the `seed` Volume created above
-# MAGIC    (Catalog Explorer → newsimpact → core → seed → Upload).
-# MAGIC 2. **DBFS FileStore**: upload to `dbfs:/FileStore/newsimpact/tickers_seed.csv`
+# MAGIC    (Catalog Explorer → lakesignal → core → seed → Upload).
+# MAGIC 2. **DBFS FileStore**: upload to `dbfs:/FileStore/lakesignal/tickers_seed.csv`
 # MAGIC    and set the widget accordingly.
 # MAGIC
 # MAGIC The cell below reads the widget path.

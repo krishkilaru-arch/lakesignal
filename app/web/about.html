@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LakeSignal — About</title>
+<style>
+:root{--bg:#0b0d10;--panel:#14171c;--panel-2:#1b1f26;--panel-3:#222830;--text:#e7ecf1;--muted:#8a93a0;--dim:#555d6b;--pos:#22c55e;--neg:#ef4444;--neu:#94a3b8;--accent:#60a5fa;--accent-bg:rgba(96,165,250,.08);--border:#242a33;--radius:8px}
+*{box-sizing:border-box;margin:0}
+body{font:14px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+nav{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);background:var(--panel);padding:0 24px}
+nav .logo{font-size:16px;font-weight:700;padding:12px 16px 12px 0;border-right:1px solid var(--border);margin-right:8px}
+nav .logo span{color:var(--accent)}
+nav a{color:var(--muted);text-decoration:none;padding:12px 16px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;transition:.15s}
+nav a:hover{color:var(--text)}
+nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+.container{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:32px;font-weight:800;margin-bottom:8px}
+h1 span{color:var(--accent)}
+.subtitle{color:var(--muted);font-size:16px;margin-bottom:40px}
+h2{font-size:18px;font-weight:700;margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:14px;font-weight:600;margin:24px 0 8px;color:var(--accent)}
+p{margin-bottom:14px;color:var(--text);line-height:1.7}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:20px 0 32px}
+.card{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card .icon{font-size:24px;margin-bottom:8px}
+.card .title{font-weight:700;margin-bottom:4px}
+.card .desc{color:var(--muted);font-size:13px;line-height:1.6}
+.field-table{width:100%;border-collapse:collapse;margin:16px 0 32px;font-size:13px}
+.field-table th{text-align:left;padding:10px 12px;background:var(--panel);color:var(--muted);font-weight:600;border-bottom:2px solid var(--border)}
+.field-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.field-table .fname{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600;color:var(--accent);white-space:nowrap}
+.field-table .example{color:var(--dim);font-size:12px;font-family:ui-monospace,monospace}
+.how-it-works{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:20px 0}
+.step{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.step .num{font-size:28px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.step .stitle{font-weight:700;margin-bottom:6px}
+.step .sdesc{color:var(--muted);font-size:12px;line-height:1.5}
+.highlight{background:var(--accent-bg);border:1px solid rgba(96,165,250,.15);border-radius:var(--radius);padding:16px 20px;margin:20px 0}
+.highlight strong{color:var(--accent)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Lake<span>Signal</span></div>
+  <a href="/">Dashboard</a>
+  <a href="/backtest">Track Record</a>
+  <a href="/about" class="active">About</a>
+</nav>
+
+<div class="container">
+<h1>What is Lake<span>Signal</span>?</h1>
+<p class="subtitle">An AI-powered news intelligence system that reads financial news in real time, identifies which stocks are affected, and predicts how prices might move — before the market reacts.</p>
+
+<div class="card-grid">
+  <div class="card">
+    <div class="icon">📡</div>
+    <div class="title">Real-Time News Monitoring</div>
+    <div class="desc">Continuously scans RSS feeds from Yahoo Finance, MarketWatch, CNBC, Reuters, SEC filings, and Seeking Alpha every 5 minutes.</div>
+  </div>
+  <div class="card">
+    <div class="icon">🧠</div>
+    <div class="title">AI-Powered Analysis</div>
+    <div class="desc">Each news article is analyzed by Claude (Anthropic's AI) through Databricks Foundation Models to predict market impact with direction, magnitude, and confidence.</div>
+  </div>
+  <div class="card">
+    <div class="icon">📊</div>
+    <div class="title">S&amp;P 500 Coverage</div>
+    <div class="desc">Tracks all 523 tickers in the S&amp;P 500 universe. When news mentions a company, LakeSignal automatically maps it to the right stock ticker.</div>
+  </div>
+  <div class="card">
+    <div class="icon">✅</div>
+    <div class="title">Daily Proof &amp; Backtesting</div>
+    <div class="desc">Every day, LakeSignal compares yesterday's predictions against actual stock prices. See exactly how accurate the AI was — full transparency.</div>
+  </div>
+</div>
+
+<h2>How It Works</h2>
+<div class="how-it-works">
+  <div class="step"><div class="num">1</div><div class="stitle">Ingest</div><div class="sdesc">News articles are fetched from 8 financial RSS feeds every 5 minutes and stored in a Delta Lake table.</div></div>
+  <div class="step"><div class="num">2</div><div class="stitle">Resolve</div><div class="sdesc">Each headline is scanned against 523 S&amp;P 500 tickers to identify which companies are mentioned.</div></div>
+  <div class="step"><div class="num">3</div><div class="stitle">Score</div><div class="sdesc">An AI model reads the article and predicts: direction (up/down/neutral), magnitude (1-10), price move %, confidence, and risk tags.</div></div>
+  <div class="step"><div class="num">4</div><div class="stitle">Prove</div><div class="sdesc">Next day, actual stock prices are fetched and compared against predictions. Accuracy is tracked over time.</div></div>
+</div>
+
+<h2>Who Benefits?</h2>
+<div class="card-grid">
+  <div class="card">
+    <div class="title">Day Traders</div>
+    <div class="desc">Get early signals about which stocks might move based on breaking news. See magnitude estimates before the market opens.</div>
+  </div>
+  <div class="card">
+    <div class="title">Portfolio Managers</div>
+    <div class="desc">Monitor risk across your holdings. Get alerts when news might negatively impact your positions, with confidence scores to prioritize attention.</div>
+  </div>
+  <div class="card">
+    <div class="title">Risk Analysts</div>
+    <div class="desc">Track risk tags (regulatory, earnings, M&amp;A, product) across your universe. Spot emerging themes before they cascade.</div>
+  </div>
+  <div class="card">
+    <div class="title">Data Teams</div>
+    <div class="desc">Built entirely on Databricks — Delta Lake, Unity Catalog, Foundation Model APIs, and Databricks Apps. A reference architecture for AI-powered data products.</div>
+  </div>
+</div>
+
+<h2>Field Glossary</h2>
+<p>Every impact row in LakeSignal contains these fields. Here's what each one means in plain English:</p>
+
+<table class="field-table">
+<thead><tr><th>Field</th><th>What It Means</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td class="fname">Time</td><td>When the AI analyzed this news article and generated the prediction. This is usually within minutes of the article being published.</td><td class="example">Apr 24, 09:35 AM</td></tr>
+<tr><td class="fname">Ticker</td><td>The stock ticker symbol of the company the news is about. LakeSignal automatically identifies which S&amp;P 500 company is mentioned in the headline.</td><td class="example">AAPL (Apple Inc.)</td></tr>
+<tr><td class="fname">Direction</td><td><strong>The most important field.</strong> The AI's prediction of whether this news will push the stock price <span style="color:var(--pos)">up (positive)</span>, <span style="color:var(--neg)">down (negative)</span>, or have <span style="color:var(--neu)">little effect (neutral)</span>.</td><td class="example">negative</td></tr>
+<tr><td class="fname">Magnitude</td><td>How big the AI thinks the impact will be, on a scale of 1 to 10. A "1" means barely noticeable; a "10" means a major market-moving event (like an earnings disaster or acquisition).</td><td class="example">6 (significant)</td></tr>
+<tr><td class="fname">Sentiment</td><td>A numerical score from -1.0 (extremely negative) to +1.0 (extremely positive) representing the overall emotional tone of the news article.</td><td class="example">-0.65</td></tr>
+<tr><td class="fname">1-Day %</td><td>The AI's prediction of how much the stock price will move by tomorrow's close, as a percentage. Positive means up, negative means down.</td><td class="example">-1.20%</td></tr>
+<tr><td class="fname">5-Day %</td><td>Same as 1-Day %, but looking 5 trading days ahead. Useful for understanding if the AI thinks the impact is short-lived or sustained.</td><td class="example">-2.80%</td></tr>
+<tr><td class="fname">Confidence</td><td>How confident the AI is in this prediction, from 0% to 100%. Higher confidence means the AI found clearer signals in the article. Predictions below 40% should be taken with a grain of salt.</td><td class="example">75%</td></tr>
+<tr><td class="fname">Risk Tags</td><td>Categories of risk identified in the article. Helps you quickly understand <em>why</em> the stock might move.<br><br>
+  <strong>earnings</strong> — related to quarterly results or guidance<br>
+  <strong>regulatory</strong> — government action, lawsuits, compliance<br>
+  <strong>product</strong> — new product, recall, competitive threat<br>
+  <strong>m&amp;a</strong> — mergers, acquisitions, divestitures<br>
+  <strong>management</strong> — CEO changes, leadership news<br>
+  <strong>macro</strong> — interest rates, trade policy, economy-wide events
+</td><td class="example">earnings, regulatory</td></tr>
+<tr><td class="fname">Headline</td><td>The original news headline. Click it to read the full article on the source website.</td><td class="example">Apple faces antitrust probe...</td></tr>
+<tr><td class="fname">Source</td><td>Which news outlet published the article. LakeSignal monitors: Yahoo Finance, MarketWatch, CNBC, Reuters, SEC, and Seeking Alpha.</td><td class="example">yahoo_finance</td></tr>
+</tbody>
+</table>
+
+<h2>The Proof Page</h2>
+<div class="highlight">
+  <p><strong>How do you know LakeSignal actually works?</strong> Visit the <a href="/backtest" style="color:var(--accent)">Proof page</a> to see daily comparisons of yesterday's predictions vs. actual stock prices. Every prediction is scored — did the direction match? Was the magnitude close? Full transparency, no hiding.</p>
+</div>
+
+<h2>Architecture</h2>
+<p>LakeSignal is built entirely on the Databricks Lakehouse Platform:</p>
+<table class="field-table">
+<thead><tr><th>Component</th><th>Technology</th></tr></thead>
+<tbody>
+<tr><td class="fname">Data Storage</td><td>Delta Lake tables in Unity Catalog (<code>lakesignal.core</code>)</td></tr>
+<tr><td class="fname">AI Model</td><td>Claude Sonnet 4 via Databricks Foundation Model APIs</td></tr>
+<tr><td class="fname">Scheduling</td><td>Lakeflow Jobs — ingest every 5 min, backtest daily</td></tr>
+<tr><td class="fname">App Framework</td><td>Databricks Apps (FastAPI + static HTML)</td></tr>
+<tr><td class="fname">Price Data</td><td>Yahoo Finance API (for backtesting)</td></tr>
+<tr><td class="fname">Ticker Universe</td><td>S&amp;P 500 (523 tickers)</td></tr>
+</tbody>
+</table>
+
+</div>
+</body>
+</html>
