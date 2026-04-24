@@ -17,6 +17,38 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 streamlit run app.py
 ```
 
+## Authentication — Two Options
+
+### Option 1: Personal Access Token (simplest)
+
+Just your Databricks PAT + serverless warehouse. No service principal needed.
+
+```toml
+[databricks]
+host = "https://dbc-XXXXX.cloud.databricks.com"
+http_path = "/sql/1.0/warehouses/XXXXX"
+token = "dapi..."
+model_endpoint = "databricks-claude-sonnet-4"
+```
+
+Generate a PAT: Databricks workspace → User Settings → Developer → Access Tokens → Generate.
+
+### Option 2: Service Principal OAuth (production)
+
+Use a service principal with M2M credentials. Better for shared/production deployments
+since the token auto-refreshes and isn't tied to a personal account.
+
+```toml
+[databricks]
+host = "https://dbc-XXXXX.cloud.databricks.com"
+http_path = "/sql/1.0/warehouses/XXXXX"
+client_id = "your-sp-client-id"
+client_secret = "your-sp-oauth-secret"
+model_endpoint = "databricks-claude-sonnet-4"
+```
+
+Generate an OAuth secret: Admin Settings → Service Principals → Secrets → Generate.
+
 ## Deploy to Streamlit Community Cloud (free, public)
 
 1. Push this `streamlit_app/` folder to a GitHub repo.
@@ -25,43 +57,23 @@ streamlit run app.py
    - Repository: `your-username/lakesignal`
    - Branch: `main`
    - Main file path: `streamlit_app/app.py`
-4. In **Advanced settings > Secrets**, paste the contents of
-   `secrets.toml.example` with real values:
-
-   ```toml
-   [databricks]
-   host = "https://dbc-XXXXX.cloud.databricks.com"
-   http_path = "/sql/1.0/warehouses/XXXXX"
-   client_id = "your-sp-client-id"
-   client_secret = "your-sp-oauth-secret"
-   model_endpoint = "databricks-claude-sonnet-4"
-   ```
-
+4. In **Advanced settings > Secrets**, paste your secrets (Option 1 or 2 above).
 5. Click **Deploy**. Your app will be live at
    `https://your-app.streamlit.app` — no login required.
 
 ## Prerequisites
 
-- A **service principal** with:
-  - `USE CATALOG` on `lakesignal`
-  - `USE SCHEMA` + `SELECT` on `lakesignal.core`
-  - `CAN QUERY` on the SQL Warehouse
-  - An **OAuth secret** (generated in Databricks admin console)
+- A Databricks workspace with Unity Catalog and Foundation Model APIs
 - A **SQL Warehouse** (Serverless recommended)
-
-### Creating the service principal OAuth secret
-
-1. Go to your Databricks workspace > **Admin Settings > Service Principals**.
-2. Find the `lakesignal` app's service principal (or create a new one).
-3. Under **Secrets**, click **Generate secret**.
-4. Copy the `client_id` and `client_secret` into your Streamlit secrets.
+- Either a **PAT** (Option 1) or a **Service Principal** (Option 2):
+  - SP needs: `USE CATALOG` on `lakesignal`, `SELECT` on `lakesignal.core`, `CAN QUERY` on warehouse
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
 | `app.py` | Main Streamlit app (Dashboard, Track Record, About) |
-| `db.py` | Database helper — `databricks-sql-connector` with SP auth |
+| `db.py` | Database helper — supports PAT or SP OAuth auth |
 | `analyzer.py` | URL analysis + LLM scoring via Foundation Model API |
 | `requirements.txt` | Python dependencies |
 | `.streamlit/config.toml` | Dark theme + Streamlit settings |
@@ -74,13 +86,14 @@ streamlit run app.py
 Public user ─▶ Streamlit Community Cloud
                    │
                    ├─▶ databricks-sql-connector ─▶ lakesignal.core.* (Delta)
+                   │     (PAT or SP OAuth)
                    │
                    └─▶ Foundation Model API ─▶ databricks-claude-sonnet-4
-                          (for /analyze URL feature)
+                          (for Analyze URL feature)
 ```
 
 The Streamlit app is **read-heavy** — it mostly queries existing impacts
-and backtest results. The “Analyze URL” feature writes to Delta tables
+and backtest results. The "Analyze URL" feature writes to Delta tables
 and calls the LLM, same as the internal FastAPI app.
 
 ## Both versions coexist
@@ -91,4 +104,4 @@ and calls the LLM, same as the internal FastAPI app.
 | **REST API** | Yes (full API surface) | No (UI only) |
 | **URL** | `*.databricksapps.com` | `*.streamlit.app` |
 | **Data source** | Same Delta tables | Same Delta tables |
-| **LLM access** | Via SP auto-auth | Via SP OAuth secret |
+| **LLM access** | Via SP auto-auth | Via PAT or SP secret |

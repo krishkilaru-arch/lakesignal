@@ -1,14 +1,13 @@
 """Database helper — connects to Unity Catalog via databricks-sql-connector.
 
-Auth uses a service principal (client_id + client_secret) via the Databricks SDK.
-Credentials are read from Streamlit secrets (.streamlit/secrets.toml).
+Supports two auth modes (configured in .streamlit/secrets.toml):
+  1. PAT (simple) — personal access token + serverless warehouse
+  2. SP OAuth — service principal client_id + client_secret
 """
 from __future__ import annotations
 
-import json
 import streamlit as st
 from databricks import sql as dbsql
-from databricks.sdk.core import Config
 
 
 CATALOG = "lakesignal"
@@ -20,23 +19,29 @@ T_IMPACT = f"{CATALOG}.{SCHEMA}.impact_analysis"
 T_BACKTEST = f"{CATALOG}.{SCHEMA}.backtest_results"
 
 
-def _cfg() -> Config:
-    """Build a Databricks SDK Config from Streamlit secrets."""
-    s = st.secrets["databricks"]
-    return Config(
-        host=s["host"],
-        client_id=s["client_id"],
-        client_secret=s["client_secret"],
-    )
-
-
 @st.cache_resource(ttl=300)
 def _connection():
     """Cached SQL connection (refreshes every 5 min)."""
     s = st.secrets["databricks"]
-    cfg = _cfg()
+    host = s["host"].replace("https://", "").replace("http://", "")
+
+    # Option 1: PAT auth (simple)
+    if s.get("token"):
+        return dbsql.connect(
+            server_hostname=host,
+            http_path=s["http_path"],
+            access_token=s["token"],
+        )
+
+    # Option 2: SP OAuth
+    from databricks.sdk.core import Config
+    cfg = Config(
+        host=s["host"],
+        client_id=s["client_id"],
+        client_secret=s["client_secret"],
+    )
     return dbsql.connect(
-        server_hostname=s["host"].replace("https://", ""),
+        server_hostname=host,
         http_path=s["http_path"],
         credentials_provider=lambda: cfg.authenticate,
     )
@@ -63,7 +68,7 @@ def _safe_row(row: dict) -> dict:
     return row
 
 
-# ── Query helpers ─────────────────────────────────────────────────────────
+# — Query helpers ————————————————————————————————————————————
 
 def get_impacts(
     ticker: str | None = None,

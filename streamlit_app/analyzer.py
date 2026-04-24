@@ -2,6 +2,7 @@
 
 Fetches a URL, extracts headline + body, resolves tickers via SQL,
 and scores via Databricks Foundation Model API.
+Supports PAT auth (simple) or SP OAuth.
 """
 from __future__ import annotations
 
@@ -14,7 +15,6 @@ from datetime import datetime, timezone
 import requests
 import streamlit as st
 from bs4 import BeautifulSoup
-from databricks.sdk import WorkspaceClient
 
 import db
 
@@ -44,8 +44,20 @@ Return ONLY valid JSON matching this schema (no prose, no markdown):
 
 
 def _get_openai_client():
-    """Create an OpenAI-compatible client via the Databricks SDK."""
+    """Create an OpenAI-compatible client for Databricks serving endpoints."""
+    from openai import OpenAI
     s = st.secrets["databricks"]
+    host = s["host"].rstrip("/")
+
+    # Option 1: PAT auth (simple)
+    if s.get("token"):
+        return OpenAI(
+            api_key=s["token"],
+            base_url=f"{host}/serving-endpoints",
+        )
+
+    # Option 2: SP OAuth
+    from databricks.sdk import WorkspaceClient
     wc = WorkspaceClient(
         host=s["host"],
         client_id=s["client_id"],
@@ -60,7 +72,6 @@ def fetch_article(url: str) -> tuple[str, str]:
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # Extract headline: prioritize og:title over title over h1
     headline = ""
     for sel in ["meta[property='og:title']", "meta[name='title']",
                 ".article-title", ".post-title", ".entry-title", ".headline",
@@ -73,13 +84,11 @@ def fetch_article(url: str) -> tuple[str, str]:
                 break
     if not headline:
         headline = url.split("/")[-1].replace("-", " ")[:200]
-    # Strip trailing site name
     if " - " in headline:
         parts = headline.rsplit(" - ", 1)
         if len(parts[1]) < 30:
             headline = parts[0].strip()
 
-    # Extract body
     body = ""
     for sel in ["article", "[role='main']", ".article-body", ".story-body", "main", ".post-content"]:
         tag = soup.select_one(sel)
@@ -111,7 +120,6 @@ def score_impacts(headline: str, body: str, tickers: list[str]) -> dict:
     if not tickers:
         return {}
 
-    # Get ticker details for context
     in_list = ", ".join(f"'{t}'" for t in tickers)
     details = db.query(f"SELECT symbol, company_name, sector FROM {db.T_TICKERS} WHERE symbol IN ({in_list})")
     detail_map = {r["symbol"]: r for r in details}
@@ -140,13 +148,13 @@ def score_impacts(headline: str, body: str, tickers: list[str]) -> dict:
         temperature=0.2,
     )
 
-    text = resp.choices[0].message.content or "{}"
-    text = re.sub(r"^```(?:json)?\s*", "", text.strip())
-    text = re.sub(r"\s*```$", "", text.strip())
+    raw = resp.choices[0].message.content or "{}"
+    raw = re.sub(r"^```(?:json)?\s*", "", raw.strip())
+    raw = re.sub(r"\s*```$", "", raw.strip())
     try:
-        parsed = json.loads(text)
+        parsed = json.loads(raw)
     except json.JSONDecodeError:
-        m = re.search(r"\{.*\}", text, re.DOTALL)
+        m = re.search(r"\{.*\}", raw, re.DOTALL)
         parsed = json.loads(m.group(0)) if m else {"impacts": []}
 
     out = {}
@@ -171,7 +179,7 @@ def score_impacts(headline: str, body: str, tickers: list[str]) -> dict:
 
 
 def analyze_url(url: str, persist: bool = True) -> dict:
-    """Full pipeline: fetch URL → resolve tickers → score → optionally persist."""
+    """Full pipeline: fetch URL -> resolve tickers -> score -> optionally persist."""
     headline, body = fetch_article(url)
     text = f"{headline} {body}"
     tickers = resolve_tickers(text)
@@ -181,16 +189,17 @@ def analyze_url(url: str, persist: bool = True) -> dict:
                 "note": "No tickers resolved from article text."}
 
     scores = score_impacts(headline, body, tickers)
-
     result = {"url": url, "headline": headline, "tickers": tickers, "impacts": scores}
 
     if not persist or not scores:
         return result
 
-    # Persist to news_events + impact_analysis
+    # Persist to Delta tables
     now = datetime.now(timezone.utc).isoformat()
     content_hash = hashlib.sha1(f"url|{url}|{now}".encode()).hexdigest()
     event_id = f"url:{content_hash[:16]}"
+    safe_hl = headline[:1000].replace("'", "''")
+    safe_body = body[:5000].replace("'", "''")
 
     conn = db._connection()
     with conn.cursor() as cur:
@@ -199,8 +208,8 @@ def analyze_url(url: str, persist: bool = True) -> dict:
             USING (SELECT '{event_id}' AS event_id) s ON t.event_id = s.event_id
             WHEN NOT MATCHED THEN INSERT
                 (event_id, source, url, headline, body, published_at, ingested_at, content_hash)
-            VALUES ('{event_id}', 'user_url', '{url}', '{headline[:1000].replace("'", "''")}',
-                    '{body[:5000].replace("'", "''")}', '{now}', '{now}', '{content_hash}')
+            VALUES ('{event_id}', 'user_url', '{url}', '{safe_hl}',
+                    '{safe_body}', '{now}', '{now}', '{content_hash}')
         """)
 
         model = st.secrets["databricks"].get("model_endpoint", "databricks-claude-sonnet-4")
@@ -208,6 +217,7 @@ def analyze_url(url: str, persist: bool = True) -> dict:
         for sym, s in scores.items():
             impact_id = str(uuid.uuid4())
             risk_json = json.dumps(s["risk_tags"])
+            safe_rat = s["rationale"][:160].replace("'", "''")
             cur.execute(f"""
                 MERGE INTO {db.T_IMPACT} t
                 USING (SELECT '{event_id}' AS event_id, '{sym}' AS ticker_symbol) s
@@ -220,7 +230,7 @@ def analyze_url(url: str, persist: bool = True) -> dict:
                         {s["sentiment_score"]}, {s["magnitude"]},
                         {s["predicted_move_pct_1d"]}, {s["predicted_move_pct_5d"]},
                         {s["confidence"]}, from_json('{risk_json}', 'ARRAY<STRING>'),
-                        '{s["rationale"][:160].replace("'", "''")}', '{now}', '{model_version}')
+                        '{safe_rat}', '{now}', '{model_version}')
             """)
 
     result["event_id"] = event_id
