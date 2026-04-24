@@ -1,8 +1,8 @@
-"""Delta access via databricks-sql-connector, using the App's service-principal OAuth.
+"""Delta access via databricks-sql-connector.
 
-All queries target the SQL Warehouse configured via DATABRICKS_WAREHOUSE_ID (or
-DATABRICKS_WAREHOUSE_HTTP_PATH). Auth falls back to the SDK's default credential
-provider, which inside a Databricks App resolves to the app's service principal.
+Works on:
+  - Databricks Apps (auto SP OAuth via SDK Config)
+  - Render / external (DATABRICKS_TOKEN env var as PAT)
 """
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ import logging
 from typing import Any, Iterable, List, Optional
 
 from databricks import sql
-from databricks.sdk.core import Config
 
 import config as cfg
 
@@ -21,22 +20,30 @@ log = logging.getLogger(__name__)
 def _server_hostname() -> str:
     host = cfg.DATABRICKS_HOST
     if host.startswith("https://"):
-        host = host[len("https://") :]
+        host = host[len("https://"):]
     if host.startswith("http://"):
-        host = host[len("http://") :]
+        host = host[len("http://"):]
     return host
 
 
 def _token_provider():
-    """Return a fresh OAuth access token using the default credential chain."""
-    c = Config()
-    hdr = c.authenticate()
-    auth = hdr.get("Authorization", "")
-    if auth.lower().startswith("bearer "):
-        return auth[7:]
-    import os
+    """Return an access token. Prefers PAT from env, falls back to SDK OAuth."""
+    # Option 1: explicit PAT (Render / external)
+    if cfg.DATABRICKS_TOKEN:
+        return cfg.DATABRICKS_TOKEN
 
-    return os.getenv("DATABRICKS_TOKEN", "")
+    # Option 2: SDK credential chain (Databricks Apps — SP OAuth)
+    try:
+        from databricks.sdk.core import Config
+        c = Config()
+        hdr = c.authenticate()
+        auth = hdr.get("Authorization", "")
+        if auth.lower().startswith("bearer "):
+            return auth[7:]
+    except Exception as e:
+        log.warning("SDK auth failed: %s", e)
+
+    raise RuntimeError("No auth configured. Set DATABRICKS_TOKEN or run inside Databricks Apps.")
 
 
 @contextlib.contextmanager
@@ -68,7 +75,6 @@ def _safe_value(v: Any) -> Any:
         return v.isoformat()
     if isinstance(v, bytes):
         return v.decode("utf-8", errors="replace")
-    # Handle custom iterables from the connector (e.g. ARRAY<STRING>)
     try:
         return [_safe_value(x) for x in v]
     except TypeError:

@@ -1,4 +1,8 @@
-"""Config pulled from the App's environment."""
+"""Config pulled from environment variables.
+
+Works on both Databricks Apps (auto-injected SP creds) and external
+platforms like Render (set DATABRICKS_TOKEN as a PAT).
+"""
 from __future__ import annotations
 
 import os
@@ -14,8 +18,11 @@ T_WEBHOOKS = f"{CATALOG}.{SCHEMA}.webhook_subscriptions"
 MODEL_ENDPOINT = os.getenv("LAKESIGNAL_MODEL", "databricks-claude-sonnet-4")
 MODEL_VERSION = f"lakesignal-0.1-{MODEL_ENDPOINT}"
 
-# Populated by the Databricks Apps runtime.
+# Populated by the Databricks Apps runtime, or set manually for Render/external.
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST", "").rstrip("/")
+
+# PAT token — used on Render/external platforms. Not needed on Databricks Apps.
+DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN", "")
 
 # Either of these identifies the SQL warehouse.
 DATABRICKS_WAREHOUSE_ID = os.getenv("DATABRICKS_WAREHOUSE_ID", "")

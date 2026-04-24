@@ -1,0 +1,24 @@
+# Render Blueprint for LakeSignal FastAPI app
+# Deploy: connect your GitHub repo on render.com, it auto-detects this file.
+services:
+  - type: web
+    name: lakesignal
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABRICKS_HOST
+        sync: false  # Set manually in Render dashboard
+      - key: DATABRICKS_TOKEN
+        sync: false
+      - key: DATABRICKS_WAREHOUSE_ID
+        sync: false
+      - key: LAKESIGNAL_CATALOG
+        value: lakesignal
+      - key: LAKESIGNAL_SCHEMA
+        value: core
+      - key: LAKESIGNAL_MODEL
+        value: databricks-claude-sonnet-4
+    rootDir: app

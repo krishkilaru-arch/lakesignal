@@ -16,25 +16,29 @@ log = logging.getLogger(__name__)
 
 
 def _client():
-    """Create an OpenAI-compatible client using the Databricks SDK."""
+    """Create an OpenAI-compatible client. PAT-first, SDK fallback."""
+    from openai import OpenAI
+
+    host = cfg.DATABRICKS_HOST
+    if not host.startswith("http"):
+        host = f"https://{host}"
+
+    # Option 1: PAT token (Render / external)
+    if cfg.DATABRICKS_TOKEN:
+        return OpenAI(api_key=cfg.DATABRICKS_TOKEN, base_url=f"{host}/serving-endpoints")
+
+    # Option 2: SDK credential chain (Databricks Apps)
     try:
         from databricks.sdk import WorkspaceClient
         w = WorkspaceClient()
         return w.serving_endpoints.get_open_ai_client()
     except Exception:
-        # Fallback to manual OpenAI client
         from databricks.sdk.core import Config
-        from openai import OpenAI
         c = Config()
         hdr = c.authenticate()
         auth = hdr.get("Authorization", "")
         token = auth[7:] if auth.lower().startswith("bearer ") else ""
-        host = cfg.DATABRICKS_HOST
-        if not host.startswith("http"):
-            host = f"https://{host}"
-        base = f"{host}/serving-endpoints"
-        log.info("Fallback OpenAI client: base_url=%s", base)
-        return OpenAI(api_key=token, base_url=base)
+        return OpenAI(api_key=token, base_url=f"{host}/serving-endpoints")
 
 
 SYSTEM_PROMPT = """You are a sell-side equity analyst. Given one news story and a
