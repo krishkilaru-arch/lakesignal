@@ -30,6 +30,7 @@ User URL ──► App /analyze/url ────────────┘     
 | Backtest job | `job/backtest_job.json` | Scheduled Mon–Fri at 5 PM ET (after market close) |
 | App | `app/` | FastAPI backend + HTML/CSS/JS front end deployed as a Databricks App |
 | Ticker seed | `data/tickers_seed.csv` | S&P 500 tickers used by the bootstrap notebook |
+| Streamlit app | `streamlit_app/` | Public-facing Streamlit dashboard (no auth required) |
 
 ## Prerequisites
 
@@ -554,6 +555,37 @@ lakesignal.core.webhook_subscriptions (
 - **Track Record page** — date-by-date accuracy with Correct/Wrong/Pending verdicts.
 - **Expandable rationale** — click any impact row to see the AI's reasoning.
 - **CSV export** — download filtered impacts for offline analysis.
+
+
+## 5. Deploy the Streamlit App (public, no auth)
+
+For public-facing access without Databricks OAuth, deploy the Streamlit version:
+
+```bash
+cd streamlit_app
+pip install -r requirements.txt
+cp .streamlit/secrets.toml.example .streamlit/secrets.toml
+# Fill in your Databricks SP credentials in secrets.toml
+streamlit run app.py
+```
+
+To deploy on **Streamlit Community Cloud** (free, anyone can access):
+
+1. Push `streamlit_app/` to GitHub.
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app** → point at `streamlit_app/app.py`.
+3. Paste your secrets in **Advanced settings → Secrets**.
+4. Click **Deploy**. Live at `https://your-app.streamlit.app`.
+
+See `streamlit_app/README.md` for full setup instructions.
+
+### Two apps, one data source
+
+| | Databricks App (FastAPI) | Streamlit Community Cloud |
+| --- | --- | --- |
+| **Auth** | Databricks OAuth (SSO) | None (public) |
+| **REST API** | Yes (full surface) | No (UI only) |
+| **Audience** | Internal / workspace users | Public / anyone |
+| **Data source** | `lakesignal.core.*` (Delta) | Same tables |
 
 ## Swapping the model
 
