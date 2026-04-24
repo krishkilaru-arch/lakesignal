@@ -1,0 +1,13 @@
+command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+env:
+  - name: NEWSIMPACT_CATALOG
+    value: newsimpact
+  - name: NEWSIMPACT_SCHEMA
+    value: core
+  - name: NEWSIMPACT_MODEL
+    value: databricks-claude-sonnet-4
+  # Set these in the Apps UI (or via `databricks apps update`):
+  #   DATABRICKS_WAREHOUSE_ID   — the SQL Warehouse this app queries through
+  # DATABRICKS_HOST and the service-principal OAuth token are provided
+  # automatically by the Apps runtime.

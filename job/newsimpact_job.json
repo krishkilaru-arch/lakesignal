@@ -1,0 +1,51 @@
+{
+  "name": "newsimpact_ingest_and_score",
+  "format": "MULTI_TASK",
+  "tasks": [
+    {
+      "task_key": "ingest_and_score",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/REPLACE_WITH_YOUR_EMAIL/newsimpact/notebooks/01_ingest_and_score",
+        "base_parameters": {
+          "catalog": "newsimpact",
+          "schema": "core",
+          "model_endpoint": "databricks-claude-sonnet-4",
+          "max_events_per_run": "50"
+        },
+        "source": "WORKSPACE"
+      },
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 0,
+        "spark_conf": {
+          "spark.master": "local[*, 4]",
+          "spark.databricks.cluster.profile": "singleNode"
+        },
+        "custom_tags": {
+          "ResourceClass": "SingleNode"
+        }
+      },
+      "libraries": [
+        { "pypi": { "package": "feedparser==6.0.11" } },
+        { "pypi": { "package": "openai==1.51.0" } }
+      ],
+      "timeout_seconds": 900,
+      "max_retries": 1,
+      "retry_on_timeout": true
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 */5 * * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "UNPAUSED"
+  },
+  "max_concurrent_runs": 1,
+  "email_notifications": {
+    "on_failure": []
+  },
+  "tags": {
+    "project": "newsimpact",
+    "env": "prototype"
+  }
+}

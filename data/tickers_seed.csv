@@ -1,0 +1,103 @@
+symbol,company_name,sector,industry,aliases,exchange
+AAPL,Apple Inc.,Technology,Consumer Electronics,"apple|iphone|ipad|mac",NASDAQ
+MSFT,Microsoft Corporation,Technology,Software,"microsoft|azure|windows|xbox",NASDAQ
+GOOGL,Alphabet Inc. Class A,Communication Services,Internet Content,"alphabet|google|youtube",NASDAQ
+GOOG,Alphabet Inc. Class C,Communication Services,Internet Content,"alphabet|google",NASDAQ
+AMZN,Amazon.com Inc.,Consumer Cyclical,Internet Retail,"amazon|aws",NASDAQ
+META,Meta Platforms Inc.,Communication Services,Internet Content,"meta|facebook|instagram|whatsapp",NASDAQ
+NVDA,NVIDIA Corporation,Technology,Semiconductors,"nvidia",NASDAQ
+TSLA,Tesla Inc.,Consumer Cyclical,Auto Manufacturers,"tesla|elon musk",NASDAQ
+BRK.B,Berkshire Hathaway Inc. Class B,Financial Services,Insurance,"berkshire|buffett",NYSE
+JPM,JPMorgan Chase & Co.,Financial Services,Banks,"jpmorgan|chase",NYSE
+V,Visa Inc.,Financial Services,Credit Services,"visa",NYSE
+MA,Mastercard Incorporated,Financial Services,Credit Services,"mastercard",NYSE
+UNH,UnitedHealth Group Inc.,Healthcare,Health Insurance,"unitedhealth|optum",NYSE
+HD,Home Depot Inc.,Consumer Cyclical,Home Improvement Retail,"home depot",NYSE
+PG,Procter & Gamble Co.,Consumer Defensive,Household Products,"procter|gamble|p&g",NYSE
+JNJ,Johnson & Johnson,Healthcare,Pharmaceutical,"johnson & johnson|j&j",NYSE
+XOM,Exxon Mobil Corporation,Energy,Oil & Gas Integrated,"exxon|exxonmobil",NYSE
+CVX,Chevron Corporation,Energy,Oil & Gas Integrated,"chevron",NYSE
+LLY,Eli Lilly and Company,Healthcare,Pharmaceutical,"eli lilly|lilly",NYSE
+ABBV,AbbVie Inc.,Healthcare,Pharmaceutical,"abbvie",NYSE
+KO,Coca-Cola Company,Consumer Defensive,Beverages,"coca-cola|coke",NYSE
+PEP,PepsiCo Inc.,Consumer Defensive,Beverages,"pepsi|pepsico",NASDAQ
+MRK,Merck & Co. Inc.,Healthcare,Pharmaceutical,"merck",NYSE
+COST,Costco Wholesale Corporation,Consumer Defensive,Discount Stores,"costco",NASDAQ
+WMT,Walmart Inc.,Consumer Defensive,Discount Stores,"walmart",NYSE
+BAC,Bank of America Corporation,Financial Services,Banks,"bank of america|bofa",NYSE
+WFC,Wells Fargo & Company,Financial Services,Banks,"wells fargo",NYSE
+C,Citigroup Inc.,Financial Services,Banks,"citigroup|citibank",NYSE
+GS,Goldman Sachs Group Inc.,Financial Services,Capital Markets,"goldman sachs|goldman",NYSE
+MS,Morgan Stanley,Financial Services,Capital Markets,"morgan stanley",NYSE
+DIS,Walt Disney Company,Communication Services,Entertainment,"disney",NYSE
+NFLX,Netflix Inc.,Communication Services,Entertainment,"netflix",NASDAQ
+ADBE,Adobe Inc.,Technology,Software,"adobe",NASDAQ
+CRM,Salesforce Inc.,Technology,Software,"salesforce",NYSE
+ORCL,Oracle Corporation,Technology,Software,"oracle",NYSE
+INTC,Intel Corporation,Technology,Semiconductors,"intel",NASDAQ
+AMD,Advanced Micro Devices Inc.,Technology,Semiconductors,"amd|advanced micro",NASDAQ
+QCOM,QUALCOMM Incorporated,Technology,Semiconductors,"qualcomm",NASDAQ
+CSCO,Cisco Systems Inc.,Technology,Networking,"cisco",NASDAQ
+IBM,International Business Machines Corporation,Technology,IT Services,"ibm",NYSE
+TXN,Texas Instruments Incorporated,Technology,Semiconductors,"texas instruments",NASDAQ
+AVGO,Broadcom Inc.,Technology,Semiconductors,"broadcom",NASDAQ
+PFE,Pfizer Inc.,Healthcare,Pharmaceutical,"pfizer",NYSE
+TMO,Thermo Fisher Scientific Inc.,Healthcare,Medical Devices,"thermo fisher",NYSE
+ABT,Abbott Laboratories,Healthcare,Medical Devices,"abbott",NYSE
+NKE,NIKE Inc.,Consumer Cyclical,Footwear,"nike",NYSE
+MCD,McDonald's Corporation,Consumer Cyclical,Restaurants,"mcdonald",NYSE
+SBUX,Starbucks Corporation,Consumer Cyclical,Restaurants,"starbucks",NASDAQ
+T,AT&T Inc.,Communication Services,Telecom,"at&t|att",NYSE
+VZ,Verizon Communications Inc.,Communication Services,Telecom,"verizon",NYSE
+CMCSA,Comcast Corporation,Communication Services,Entertainment,"comcast|xfinity|nbcuniversal",NASDAQ
+BA,Boeing Company,Industrials,Aerospace & Defense,"boeing",NYSE
+CAT,Caterpillar Inc.,Industrials,Farm & Heavy Construction Machinery,"caterpillar",NYSE
+GE,General Electric Company,Industrials,Specialty Industrial Machinery,"general electric",NYSE
+HON,Honeywell International Inc.,Industrials,Conglomerates,"honeywell",NASDAQ
+RTX,RTX Corporation,Industrials,Aerospace & Defense,"raytheon|rtx",NYSE
+LMT,Lockheed Martin Corporation,Industrials,Aerospace & Defense,"lockheed martin|lockheed",NYSE
+UPS,United Parcel Service Inc.,Industrials,Integrated Freight,"ups|united parcel",NYSE
+FDX,FedEx Corporation,Industrials,Integrated Freight,"fedex",NYSE
+UBER,Uber Technologies Inc.,Industrials,Software Application,"uber",NYSE
+LYFT,Lyft Inc.,Industrials,Software Application,"lyft",NASDAQ
+PYPL,PayPal Holdings Inc.,Financial Services,Credit Services,"paypal",NASDAQ
+SQ,Block Inc.,Financial Services,Credit Services,"block inc|square",NYSE
+COIN,Coinbase Global Inc.,Financial Services,Capital Markets,"coinbase",NASDAQ
+SHOP,Shopify Inc.,Technology,Software,"shopify",NYSE
+SNOW,Snowflake Inc.,Technology,Software,"snowflake",NYSE
+PLTR,Palantir Technologies Inc.,Technology,Software,"palantir",NYSE
+NOW,ServiceNow Inc.,Technology,Software,"servicenow",NYSE
+INTU,Intuit Inc.,Technology,Software,"intuit|turbotax|quickbooks",NASDAQ
+MU,Micron Technology Inc.,Technology,Semiconductors,"micron",NASDAQ
+ASML,ASML Holding N.V.,Technology,Semiconductor Equipment,"asml",NASDAQ
+TSM,Taiwan Semiconductor Manufacturing Company,Technology,Semiconductors,"tsmc|taiwan semiconductor",NYSE
+BABA,Alibaba Group Holding Limited,Consumer Cyclical,Internet Retail,"alibaba",NYSE
+PDD,PDD Holdings Inc.,Consumer Cyclical,Internet Retail,"pinduoduo|pdd|temu",NASDAQ
+JD,JD.com Inc.,Consumer Cyclical,Internet Retail,"jd.com",NASDAQ
+F,Ford Motor Company,Consumer Cyclical,Auto Manufacturers,"ford motor|ford",NYSE
+GM,General Motors Company,Consumer Cyclical,Auto Manufacturers,"general motors|gm",NYSE
+RIVN,Rivian Automotive Inc.,Consumer Cyclical,Auto Manufacturers,"rivian",NASDAQ
+LCID,Lucid Group Inc.,Consumer Cyclical,Auto Manufacturers,"lucid motors|lucid",NASDAQ
+NIO,NIO Inc.,Consumer Cyclical,Auto Manufacturers,"nio",NYSE
+AAL,American Airlines Group Inc.,Industrials,Airlines,"american airlines",NASDAQ
+DAL,Delta Air Lines Inc.,Industrials,Airlines,"delta air lines|delta airlines",NYSE
+UAL,United Airlines Holdings Inc.,Industrials,Airlines,"united airlines",NASDAQ
+LUV,Southwest Airlines Co.,Industrials,Airlines,"southwest airlines",NYSE
+CVS,CVS Health Corporation,Healthcare,Healthcare Plans,"cvs health",NYSE
+WBA,Walgreens Boots Alliance Inc.,Healthcare,Pharmaceutical Retailers,"walgreens",NASDAQ
+TGT,Target Corporation,Consumer Defensive,Discount Stores,"target",NYSE
+LOW,Lowe's Companies Inc.,Consumer Cyclical,Home Improvement Retail,"lowe's|lowes",NYSE
+SPOT,Spotify Technology S.A.,Communication Services,Entertainment,"spotify",NYSE
+ABNB,Airbnb Inc.,Consumer Cyclical,Travel Services,"airbnb",NASDAQ
+DASH,DoorDash Inc.,Consumer Cyclical,Internet Retail,"doordash",NYSE
+ROKU,Roku Inc.,Communication Services,Entertainment,"roku",NASDAQ
+ZM,Zoom Communications Inc.,Technology,Software,"zoom",NASDAQ
+DOCU,DocuSign Inc.,Technology,Software,"docusign",NASDAQ
+MRNA,Moderna Inc.,Healthcare,Biotechnology,"moderna",NASDAQ
+BNTX,BioNTech SE,Healthcare,Biotechnology,"biontech",NASDAQ
+GILD,Gilead Sciences Inc.,Healthcare,Biotechnology,"gilead",NASDAQ
+AMGN,Amgen Inc.,Healthcare,Biotechnology,"amgen",NASDAQ
+BMY,Bristol-Myers Squibb Company,Healthcare,Pharmaceutical,"bristol-myers|bristol myers",NYSE
+OXY,Occidental Petroleum Corporation,Energy,Oil & Gas E&P,"occidental petroleum",NYSE
+COP,ConocoPhillips,Energy,Oil & Gas E&P,"conocophillips",NYSE
+SLB,Schlumberger Limited,Energy,Oil & Gas Equipment,"schlumberger",NYSE
