@@ -1,0 +1,47 @@
+{
+  "name": "lakesignal_daily_backtest",
+  "format": "MULTI_TASK",
+  "tasks": [
+    {
+      "task_key": "backtest",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/krish.kilaru@lumenalta.com/lakesignal/notebooks/03_backtest",
+        "base_parameters": {
+          "catalog": "lakesignal",
+          "schema": "core"
+        },
+        "source": "WORKSPACE"
+      },
+      "environment_key": "default",
+      "timeout_seconds": 900,
+      "max_retries": 1,
+      "retry_on_timeout": true
+    }
+  ],
+  "environments": [
+    {
+      "environment_key": "default",
+      "spec": {
+        "client": "1",
+        "dependencies": [
+          "yfinance>=0.2.0",
+          "openai>=1.60.0",
+          "feedparser==6.0.11"
+        ]
+      }
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 0 21 ? * MON-FRI",
+    "timezone_id": "UTC",
+    "pause_status": "UNPAUSED"
+  },
+  "max_concurrent_runs": 1,
+  "email_notifications": {
+    "on_failure": []
+  },
+  "tags": {
+    "project": "lakesignal",
+    "type": "backtest"
+  }
+}
